@@ -47,7 +47,7 @@
 ;; (0 2 0)
 
 (defun substituir (index arcsList &optional (x 1))
-	"Função que recebe um índice, uma lista e valor x e deverá substituir o elemento nessaposição pelo valor x"
+	"Função que recebe um índice, uma lista e valor x e deverá substituir o elemento nessa posição pelo valor x"
 	(cond 
 		((= (- index 1) 0) (cons x (cdr arcsList)))
 		
@@ -113,3 +113,6 @@
 	)
 
 )
+
+
+;; ============ NODE EXPANSION ============
