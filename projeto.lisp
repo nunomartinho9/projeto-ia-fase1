@@ -96,7 +96,7 @@
                             (progn 
                                 (format t "Escolha uma opcao valida!") (ler-tabuleiros menuVoltar)
                             )
-                            (list opcao (nth (- 1 opcao) lista))
+                            (list opcao (nth (1- opcao) lista))
                         )
                     )
                   )
