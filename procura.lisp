@@ -11,11 +11,12 @@
 
 
 ;; ============ NODE ============
-;;<node>::= (<state> <parent> <closed-boxes> <g> <h>)
+;;<node>::= (<state> <parent> <boxes-remaining> <g> <h>)
 
-(defun construct-node (board parent closedBoxes &optional (g 0) (h 0))
+;; (construct-node (test-board) nil 1)
+(defun construct-node (board parent boxesRemaining &optional (g 0) (h 0))
 "Constroi a estrutura do no."
-  (list board parent closedBoxes g h)
+  (list board parent boxesRemaining g h)
 )
 
 (defun get-node-state (node) 
@@ -28,7 +29,7 @@
     (cadr node)
 )
 
-(defun get-node-closed-boxes (node)
+(defun get-node-boxes-remaining (node)
     "Devolve o numero de caixas fechadas deste estado."
     (nth 2 node)
 )

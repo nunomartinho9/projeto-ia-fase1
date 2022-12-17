@@ -13,6 +13,22 @@
 	)
 )
 
+(defun tabuleiro-teste-simples ()
+  "Retorna um tabuleiro 2x2 (2 arcos na vertical por 2 arcos na horizontal)"
+	'(
+		((0)(0))
+		((0)(1))
+	)
+)
+
+(defun caixa-fechada ()
+  "Retorna um tabuleiro 2x2 (2 arcos na vertical por 2 arcos na horizontal)"
+	'(
+		((1)(1))
+		((1)(1))
+	)
+)
+
 ;; ============ SELETORES ============
 
 ;; (get-arcos-horizontais (tabuleiro-teste))
@@ -33,9 +49,9 @@
 ;; 1
 (defun get-arco-na-posicao (nLista pos listaArcos)
 	"Função que retorna o arco que se encontra numa posicao da lista de arcos horizontais ou verticais."
-	(if (or (= nLista 0) (= pos 0)) 
+	(if (or (< nLista 0) (< pos 0)) 
 		 NIL
-		(nth (- pos 1) (nth (- nLista 1) listaArcos))
+		(nth pos (nth nLista listaArcos))
 	)
 )
 
@@ -70,6 +86,20 @@
 
 	)
 	
+)
+
+;;(count-colunas (tabuleiro-teste))
+;;3
+(defun count-colunas (tabuleiro)
+	"Contagem de colunas do tabuleiro"
+	(length (car (get-arcos-horizontais tabuleiro)))
+)
+
+;;(count-linhas (tabuleiro-teste))
+;;4
+(defun count-linhas (tabuleiro)
+	"Contagem de linhas do tabuleiro"
+	(length (get-arcos-horizontais tabuleiro))
 )
 
 ;; ============ OPERADORES ============
@@ -115,4 +145,55 @@
 )
 
 
-;; ============ NODE EXPANSION ============
+;; verificar se ja ta fechada a caixa
+(defun existe-caixa-fechada (linha coluna tabuleiro) 
+	"Verifica num determinado arco com as suas coordenadas, se existe uma caixa fechada num tabuleiro"
+	
+	(and 
+		(=
+			(if (not (get-arco-na-posicao linha coluna (get-arcos-horizontais tabuleiro)))
+			  0 (get-arco-na-posicao linha coluna (get-arcos-horizontais tabuleiro))		
+			) 1
+		)
+		(=
+			(if (not (get-arco-na-posicao (1+ linha) coluna (get-arcos-horizontais tabuleiro)))
+			  0 (get-arco-na-posicao (1+ linha) coluna (get-arcos-horizontais tabuleiro))	
+			) 1
+		)
+		(=
+			(if (not (get-arco-na-posicao coluna linha (get-arcos-verticais tabuleiro))) 
+				0 (get-arco-na-posicao coluna linha (get-arcos-verticais tabuleiro))		
+			) 1
+		)
+		(=
+			(if (not (get-arco-na-posicao (1+ coluna) linha (get-arcos-horizontais tabuleiro))) 
+			0 (get-arco-na-posicao (1+ coluna) linha (get-arcos-horizontais tabuleiro))		
+			) 1
+		)
+	)
+)
+
+;; verificar no tabuleiro quantas caixas fechadas
+(defun contar-caixas-fechadas (tabuleiro &optional (linha 0) (col 0))
+
+	(cond
+		( (>= col (count-colunas tabuleiro)) (contar-caixas-fechadas tabuleiro (1+ linha)))
+		( (>= linha (count-linhas tabuleiro)) 0)
+		(T
+			(+ 
+				(if (existe-caixa-fechada linha col tabuleiro) 1 0)
+
+				(contar-caixas-fechadas tabuleiro linha (1+ col))
+			)
+		)
+	)
+
+
+)
+
+;; calcular quantas caixas ainda faltam fechar (obj - closed)
+
+;;verificar se pode meter o arco na horizontal num tabuleiro
+;;verificar se pode meter o arco na vertical num tabuleiro
+
+;; fazer a jogada
