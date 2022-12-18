@@ -3,7 +3,7 @@
 
 
 
-;;; Tabuleiro
+;; ============ TABULEIROS PARA TESTE ============
 ;; '( ((0 0 0) (0 0 1) (0 1 1) (0 0 1)) ((0 0 0) (0 1 1) (1 0 1) (0 1 1)) )
 (defun tabuleiro-teste ()
   "Retorna um tabuleiro 3x3 (3 arcos na vertical por 3 arcos na horizontal)"
@@ -48,7 +48,7 @@
 ;; (get-arco-na-posicao 2 3 (get-arcos-horizontais (tabuleiro-teste)))
 ;; 1
 (defun get-arco-na-posicao (nLista pos listaArcos)
-	"Função que retorna o arco que se encontra numa posicao da lista de arcos horizontais ou verticais."
+	"Função que retorna o arco que se encontra numa posicao da lista de arcos horizontais ou verticais. (começa no 0 o index)"
 	(if (or (< nLista 0) (< pos 0)) 
 		 NIL
 		(nth pos (nth nLista listaArcos))
@@ -62,8 +62,10 @@
 ;; (substituir 2 (car (get-arcos-verticais (tabuleiro-teste))) 2) -> (0 1 0)
 ;; (0 2 0)
 
+;;; TESTAR POIS OUVE ALTERAÇÕES \/ 
+
 (defun substituir (index arcsList &optional (x 1))
-	"Função que recebe um índice, uma lista e valor x e deverá substituir o elemento nessa posição pelo valor x"
+	"Função que recebe um índice (começa no 1), uma lista e valor x e deverá substituir o elemento nessa posição pelo valor x"
 	(cond 
 		((= (- index 1) 0) (cons x (cdr arcsList)))
 		
@@ -76,7 +78,7 @@
 
 ;; (arco-na-posicao 4 1 (get-arcos-verticais (tabuleiro-teste)))
 ;; ((0 0 0) (0 1 1) (1 0 1) (1 1 1))
-
+;;; TESTAR POIS OUVE ALTERAÇÕES \/ 
 (defun arco-na-posicao (listPos arcPos arcsList &optional (x 1))
 	"Insere um arco numa lista que representa o conjunto de arcos horizontais ou verticais de um tabuleiro."	
 	(cond 
@@ -109,6 +111,8 @@
 ;; (arco-horizontal 3 2 (tabuleiro-teste))
 ;; (arco-horizontal 7 2 (tabuleiro-teste))
 ;; (((0 0 0) (0 0 1) (1 1 1) (0 0 1)) ((0 0 0) (0 1 1) (1 0 1) (0 1 1)))
+
+;;; TESTAR POIS OUVE ALTERAÇÕES \/ 
 (defun arco-horizontal (listPos arcPos tabuleiro &optional (x 1))
 	"Função que recebe dois índices e o tabuleiro e coloca um arco horizontal nessa posição."
 	(cond
@@ -145,7 +149,12 @@
 )
 
 
-;; verificar se ja ta fechada a caixa
+;; (existe-caixa-fechada 0 0 (caixa-fechada))
+;; T
+;; (existe-caixa-fechada 0 0 (tabuleiro-teste-simples))
+;; NIL
+;;(existe-caixa-fechada 1 0 (tabuleiro-teste-simples))
+;; NIL
 (defun existe-caixa-fechada (linha coluna tabuleiro) 
 	"Verifica num determinado arco com as suas coordenadas, se existe uma caixa fechada num tabuleiro"
 	
@@ -175,7 +184,7 @@
 
 ;; verificar no tabuleiro quantas caixas fechadas
 (defun contar-caixas-fechadas (tabuleiro &optional (linha 0) (col 0))
-
+	"Devolve o numero de caixas fechadas num tabuleiro. (começa no index 0)"
 	(cond
 		( (>= col (count-colunas tabuleiro)) (contar-caixas-fechadas tabuleiro (1+ linha)))
 		( (>= linha (count-linhas tabuleiro)) 0)
@@ -191,9 +200,9 @@
 
 )
 
-;; calcular quantas caixas ainda faltam fechar (obj - closed)
+;; calcular quantas caixas ainda faltam fechar (obj - closed) nao fazer por enquanto
 
-;;verificar se pode meter o arco na horizontal num tabuleiro
+;;verificar se pode meter o arco na horizontal num tabuleiro (ou seja eu quero devolver uma posicao em que se possa jogar, procurar sequencial)
 ;;verificar se pode meter o arco na vertical num tabuleiro
-
+;; saber o numero das possibilidaes pode ser bom :)
 ;; fazer a jogada
