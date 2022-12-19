@@ -62,7 +62,7 @@
 ;; (substituir 2 (car (get-arcos-verticais (tabuleiro-teste))) 2) -> (0 1 0)
 ;; (0 2 0)
 
-;;; TESTAR POIS OUVE ALTERAÇÕES \/ 
+;;; TESTAR POIS OUVE ALTERAÇÕES \/ -> STATUS: OK
 
 (defun substituir (index arcsList &optional (x 1))
 	"Função que recebe um índice (começa no 1), uma lista e valor x e deverá substituir o elemento nessa posição pelo valor x"
@@ -75,10 +75,11 @@
 
 ;; (arco-na-posicao 2 2 (get-arcos-horizontais (tabuleiro-teste)))
 ;; ((0 0 0) (0 1 1) (0 1 1) (0 0 1))
-
 ;; (arco-na-posicao 4 1 (get-arcos-verticais (tabuleiro-teste)))
 ;; ((0 0 0) (0 1 1) (1 0 1) (1 1 1))
-;;; TESTAR POIS OUVE ALTERAÇÕES \/ 
+
+;;; TESTAR POIS OUVE ALTERAÇÕES \/ -> STATUS: OK
+
 (defun arco-na-posicao (listPos arcPos arcsList &optional (x 1))
 	"Insere um arco numa lista que representa o conjunto de arcos horizontais ou verticais de um tabuleiro."	
 	(cond 
@@ -112,7 +113,7 @@
 ;; (arco-horizontal 7 2 (tabuleiro-teste))
 ;; (((0 0 0) (0 0 1) (1 1 1) (0 0 1)) ((0 0 0) (0 1 1) (1 0 1) (0 1 1)))
 
-;;; TESTAR POIS OUVE ALTERAÇÕES \/ 
+;;; TESTAR POIS OUVE ALTERAÇÕES \/ -> STATUS: OK
 (defun arco-horizontal (listPos arcPos tabuleiro &optional (x 1))
 	"Função que recebe dois índices e o tabuleiro e coloca um arco horizontal nessa posição."
 	(cond
@@ -203,6 +204,25 @@
 ;; calcular quantas caixas ainda faltam fechar (obj - closed) nao fazer por enquanto
 
 ;;verificar se pode meter o arco na horizontal num tabuleiro (ou seja eu quero devolver uma posicao em que se possa jogar, procurar sequencial)
+;; (onde-jogar-horizontal (tabuleiro-teste))
+;; NOT DONE - TA MALI
+(defun onde-jogar-horizontal (tabuleiro &optional (linha 1) (arcPos 1))
+	"Devolve uma posição onde pode ser feita uma jogada na horizontal (procura sequencial)"
+	(cond
+		(T 
+			(if (not (arco-horizontal linha arcPos tabuleiro))
+				(if (> arcPos 3)
+					(onde-jogar-horizontal tabuleiro (1+ linha))
+					(if (> linha (count-linhas tabuleiro))
+						nil
+						(onde-jogar-horizontal tabuleiro (1+ arcPos))
+					)
+				)
+				(append (list linha) (list arcPos))
+			)
+		)
+	)
+)
 ;;verificar se pode meter o arco na vertical num tabuleiro
 ;; saber o numero das possibilidaes pode ser bom :)
 ;; fazer a jogada
