@@ -84,3 +84,47 @@
 
 
 ;; ============ PERFORMANCE MEASURES ============
+
+;; Estrutura de dados a ser utilizada: (<solucao> <num-abertos> <num-fechados>)
+
+;; fator de ramificação média
+;; "funcao": num-nos-expandidos ou num-nos-expandidos-a*
+(defun fator-ramificacao-media (lista &optional (nos-expandidos (num-nos-expandidos lista)) (nos-gerados (num-nos-gerados lista)))
+"Retorna o fator de ramificação média"
+    
+)
+
+(defun tamanho-solucao (lista)
+"Retorna o tamanho da solução"
+    (length (car lista))
+)
+
+(defun num-nos-gerados (lista)
+"Retorna o número de nós gerados"
+    (+ (second lista) (third lista))
+)
+
+(defun num-nos-expandidos (lista &optional algoritmo)
+"Retorna o número de nós expandidos"
+    (cond ((or (eql algoritmo "bfs") (eql algoritmo "dfs")) (third lista))
+          ((eql algoritmo "a*") (fourth lista)) 
+            (T (third lista))
+    )
+)
+
+(defun penetrancia (lista)
+"Calcula a penetrância"
+    (/ (length (car lista)) (num-nos-gerados lista))
+)
+
+(defun no-solucao (lista)
+"Retorna o nó solução"
+    (nth (1- (length (car lista))) (car lista))
+)
+
+(defun hora-atual ()
+"Retorna a hora atual (hh mm ss)"
+    (multiple-value-bind (s m h)
+            (get-decoded-time)
+        (list h m s))
+)
