@@ -16,8 +16,8 @@
 (defun tabuleiro-teste-simples ()
   "Retorna um tabuleiro 2x2 (2 arcos na vertical por 2 arcos na horizontal)"
 	'(
-		((0)(0))
-		((0)(1))
+		((0)(0))  
+		((0)(1))    
 	)
 )
 
@@ -119,7 +119,7 @@
 	(cond
 		( (> listPos (length (get-arcos-horizontais tabuleiro)) ) NIL)
 		( (> arcPos (length (car (get-arcos-horizontais tabuleiro))) ) NIL)	
-		( (= (get-arco-na-posicao listPos arcPos (get-arcos-horizontais tabuleiro)) 1) NIL)
+		( (= (get-arco-na-posicao (1- listPos) (1- arcPos) (get-arcos-horizontais tabuleiro)) 1) NIL)
 		(T 
 			(list (arco-na-posicao listPos arcPos (get-arcos-horizontais tabuleiro) x) 
 				  (get-arcos-verticais tabuleiro)) 
@@ -140,7 +140,7 @@
 	(cond
 		( (> listPos (length (get-arcos-verticais tabuleiro)) ) NIL)
 		( (> arcPos (length (car (get-arcos-verticais tabuleiro))) ) NIL)	
-		( (= (get-arco-na-posicao listPos arcPos (get-arcos-verticais tabuleiro)) 1) NIL)
+		( (= (get-arco-na-posicao (1- listPos) (1- arcPos) (get-arcos-verticais tabuleiro)) 1) NIL)
 		(T 
 			(list (get-arcos-horizontais tabuleiro) 
 				  (arco-na-posicao listPos arcPos (get-arcos-verticais tabuleiro) x)) 
@@ -203,26 +203,7 @@
 
 ;; calcular quantas caixas ainda faltam fechar (obj - closed) nao fazer por enquanto
 
-;;verificar se pode meter o arco na horizontal num tabuleiro (ou seja eu quero devolver uma posicao em que se possa jogar, procurar sequencial)
-;; (onde-jogar-horizontal (tabuleiro-teste))
-;; NOT DONE - TA MALI
-(defun onde-jogar-horizontal (tabuleiro &optional (linha 1) (arcPos 1))
-	"Devolve uma posição onde pode ser feita uma jogada na horizontal (procura sequencial)"
-	(cond
-		(T 
-			(if (not (arco-horizontal linha arcPos tabuleiro))
-				(if (> arcPos 3)
-					(onde-jogar-horizontal tabuleiro (1+ linha))
-					(if (> linha (count-linhas tabuleiro))
-						nil
-						(onde-jogar-horizontal tabuleiro (1+ arcPos))
-					)
-				)
-				(append (list linha) (list arcPos))
-			)
-		)
-	)
-)
+
 ;;verificar se pode meter o arco na vertical num tabuleiro
 ;; saber o numero das possibilidaes pode ser bom :)
 ;; fazer a jogada

@@ -10,6 +10,26 @@
 ;; definir a estrutura da solucao
 ;; <solucao>::= (<camiho-solucao> <abertos> <fechados>)
 
+(defun no-teste () 
+    '(
+        (
+		    ((0)(0))  
+		    ((0)(1))    
+	    )
+        nil 1 0 0
+     )
+
+)
+
+(defun no-teste-2 () 
+    '(
+(((0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 1 0 0 0 0 0) (0 1 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0))
+((0 0 0 0 0 0 0) (0 0 0 0 1 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0)))
+        nil 5 0 0
+     )
+
+)
+
 ;; (criar-no (test-board) nil 1)
 (defun criar-no (tabuleiro pai caixas-objetivo &optional (g 0) (h 0))
 "Constroi a estrutura do no."
@@ -48,33 +68,69 @@
 
 
 ;; ============ GERAR NOS ============
+;; (gerar-nos-horizontal (no-teste))
+#|
+(
+  (
+    (((1) (0)) ((0) (1))) 
+    ((((0) (0)) ((0) (1))) NIL 1 0 0) 
+    1 1 0
+  )
+  (
+    (((0) (1)) ((0) (1))) 
+    ((((0) (0)) ((0) (1))) NIL 1 0 0) 
+    1 1 0
+  )
+)
+ |#
 
-;; gerar um nó sucessor
-;; (gerar-no-sucessor (tabuleiro-teste) 1 1 'arco-horizontal)
-;; (gerar-no-sucessor (tabuleiro-teste) 1 1 'arco-vertical)
-;;                  FALTA DAR FIX
-(defun gerar-no-sucessor (no listPos arcPos funcao)
-    "Gerar um nó sucessor de um nó pai"
-    (let ((novoTabuleiro (get-no-estado no)))
-        (criar-no
-            (funcall funcao listPos arcPos novoTabuleiro)
-            no (get-no-objetivo no) (1+ (get-no-profundidade no)) (get-no-h no)
+(defun gerar-nos-horizontal (no &optional (linha 1) (col 1))
+    "Devolve os sucessores de um no, da parte horizontal do tabuleiro. (Começa no index 1)"
+    (cond 
+        ( (> col (count-colunas (get-no-estado no))) (gerar-nos-horizontal no (1+ linha)))
+		( (> linha (count-linhas (get-no-estado no))) '())
+        ( (= (get-arco-na-posicao (1- linha) (1- col) (get-arcos-horizontais (get-no-estado no) )) 1)  (gerar-nos-horizontal no linha (1+ col)))
+
+        (T
+            (cons (criar-no (arco-horizontal linha col (get-no-estado no)) no (get-no-objetivo no) (1+ (get-no-profundidade no))) (gerar-nos-horizontal no linha (1+ col)))    
+        )
+    )
+)
+;; (gerar-nos-vertical (no-teste))
+#|
+(
+  (
+    (((0) (0)) ((1) (1))) 
+    ((((0) (0)) ((0) (1))) NIL 1 0 0) 
+    1 1 0
+  )
+)
+ |#
+(defun gerar-nos-vertical (no &optional (linha 1) (col 1))
+    "Devolve os sucessores de um no, da parte vertical do tabuleiro. (Começa no index 1)"
+    (cond 
+        ( (> col (count-colunas (get-no-estado no))) (gerar-nos-vertical no (1+ linha)))
+		( (> linha (count-linhas (get-no-estado no))) '())
+        ( (= (get-arco-na-posicao (1- linha) (1- col) (get-arcos-verticais (get-no-estado no) )) 1)  (gerar-nos-vertical no linha (1+ col)))
+
+        (T
+            (cons 
+                (criar-no (arco-vertical col linha (get-no-estado no)) no (get-no-objetivo no) (1+ (get-no-profundidade no))) 
+                (gerar-nos-vertical no linha (1+ col))
+            )    
         )
     )
 )
 
-;; gerar sucessores
-;; (expandir um no) gerar sucessores (expandir no) -> lista de sucessores de um no.
-;;                  NÃO TERMINADO
-(defun gerar-no-sucessores (no)
-    "Gerar nós sucessores de um nó"
-    (mapcar #'(lambda (tabuleiro)
-        (criar-no tabuleiro no (get-no-objetivo no) (1+ (get-no-profundidade no))))
-        (mapcar #'(lambda (posicao)
-            (arco-na-posicao (car posicao) (cadr posicao) (get-no-estado no)))
-            
-        )
-    )
+;; (expandir-no (no-teste))
+#|
+ (((((1) (0)) ((0) (1))) ((((0) (0)) ((0) (1))) NIL 1 0 0) 1 1 0)
+ ((((0) (1)) ((0) (1))) ((((0) (0)) ((0) (1))) NIL 1 0 0) 1 1 0)
+ ((((0) (0)) ((1) (1))) ((((0) (0)) ((0) (1))) NIL 1 0 0) 1 1 0))
+ |#
+(defun expandir-no (no)
+    "Expande um no e devolve os seus sucessores."
+    (append (gerar-nos-horizontal no) (gerar-nos-vertical no))
 )
 
 ;; ============ Funcoes auxiliares para procura ============
