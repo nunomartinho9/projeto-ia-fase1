@@ -21,7 +21,7 @@
 	)
 )
 
-(defun caixa-fechada ()
+(defun tabuleiro-caixa-fechada ()
   "Retorna um tabuleiro 2x2 (2 arcos na vertical por 2 arcos na horizontal)"
 	'(
 		((1)(1))
@@ -61,9 +61,6 @@
 ;; (1 0 0)
 ;; (substituir 2 (car (get-arcos-verticais (tabuleiro-teste))) 2) -> (0 1 0)
 ;; (0 2 0)
-
-;;; TESTAR POIS OUVE ALTERAÇÕES \/ -> STATUS: OK
-
 (defun substituir (index arcsList &optional (x 1))
 	"Função que recebe um índice (começa no 1), uma lista e valor x e deverá substituir o elemento nessa posição pelo valor x"
 	(cond 
@@ -77,11 +74,8 @@
 ;; ((0 0 0) (0 1 1) (0 1 1) (0 0 1))
 ;; (arco-na-posicao 4 1 (get-arcos-verticais (tabuleiro-teste)))
 ;; ((0 0 0) (0 1 1) (1 0 1) (1 1 1))
-
-;;; TESTAR POIS OUVE ALTERAÇÕES \/ -> STATUS: OK
-
 (defun arco-na-posicao (listPos arcPos arcsList &optional (x 1))
-	"Insere um arco numa lista que representa o conjunto de arcos horizontais ou verticais de um tabuleiro."	
+	"Insere um arco numa lista que representa o conjunto de arcos horizontais ou verticais de um tabuleiro. (Começa no indice 1)"	
 	(cond 
 		( (= listPos 1) (cons (substituir arcPos (nth (- listPos 1) arcsList) x) (cdr arcsList)))
 
@@ -112,10 +106,8 @@
 ;; (arco-horizontal 3 2 (tabuleiro-teste))
 ;; (arco-horizontal 7 2 (tabuleiro-teste))
 ;; (((0 0 0) (0 0 1) (1 1 1) (0 0 1)) ((0 0 0) (0 1 1) (1 0 1) (0 1 1)))
-
-;;; TESTAR POIS OUVE ALTERAÇÕES \/ -> STATUS: OK
 (defun arco-horizontal (listPos arcPos tabuleiro &optional (x 1))
-	"Função que recebe dois índices e o tabuleiro e coloca um arco horizontal nessa posição."
+	"Função que recebe dois índices e o tabuleiro e coloca um arco horizontal nessa posição.(Começa no indice 1)"
 	(cond
 		( (> listPos (length (get-arcos-horizontais tabuleiro)) ) NIL)
 		( (> arcPos (length (car (get-arcos-horizontais tabuleiro))) ) NIL)	
@@ -136,7 +128,7 @@
 ;; (arco-vertical 2 2 (tabuleiro-teste))
 ;; (arco-vertical 5 5 (tabuleiro-teste))
 (defun arco-vertical (arcPos listPos tabuleiro &optional (x 1))
-	"Função que recebe dois índices e o tabuleiro e coloca um arco vertical nessa posição."
+	"Função que recebe dois índices e o tabuleiro e coloca um arco vertical nessa posição.(Começa no indice 1)"
 	(cond
 		( (> listPos (length (get-arcos-verticais tabuleiro)) ) NIL)
 		( (> arcPos (length (car (get-arcos-verticais tabuleiro))) ) NIL)	
@@ -156,6 +148,7 @@
 ;; NIL
 ;;(existe-caixa-fechada 1 0 (tabuleiro-teste-simples))
 ;; NIL
+;; isto ta uma cagada mas funciona vamos melhorar depois
 (defun existe-caixa-fechada (linha coluna tabuleiro) 
 	"Verifica num determinado arco com as suas coordenadas, se existe uma caixa fechada num tabuleiro"
 	
@@ -202,8 +195,3 @@
 )
 
 ;; calcular quantas caixas ainda faltam fechar (obj - closed) nao fazer por enquanto
-
-
-;;verificar se pode meter o arco na vertical num tabuleiro
-;; saber o numero das possibilidaes pode ser bom :)
-;; fazer a jogada
