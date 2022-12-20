@@ -170,35 +170,11 @@
 			) 1
 		)
 		(=
-			(if (not (get-arco-na-posicao (1+ coluna) linha (get-arcos-horizontais tabuleiro))) 
-			0 (get-arco-na-posicao (1+ coluna) linha (get-arcos-horizontais tabuleiro))		
+			(if (not (get-arco-na-posicao (1+ coluna) linha (get-arcos-verticais tabuleiro))) 
+			0 (get-arco-na-posicao (1+ coluna) linha (get-arcos-verticais tabuleiro))		
 			) 1
 		)
 	)
-)
-
-(defun checkClosedBox (linha col tabuleiro)
-  (if 
-  	(or 
-		(or (< linha 0) (< col 0))
-		(>= linha (count-linhas tabuleiro))
-		(>= col (count-colunas tabuleiro))
-  	)
-    NIL
-    (and
-          "A"(= (get-arco-na-posicao linha col (get-arcos-horizontais tabuleiro)) 1)
-          "B"(= (get-arco-na-posicao col linha (get-arcos-verticais tabuleiro)) 1)
-          "C"(= 
-		  		(if (not (get-arco-na-posicao (+ col 1) linha (get-arcos-verticais tabuleiro))) 0 
-				(get-arco-na-posicao (+ col 1) linha (get-arcos-verticais tabuleiro)))
-			 1)
-          "D"(= 
-		  		(if (not (get-arco-na-posicao (+ linha 1) col (get-arcos-horizontais tabuleiro))) 
-				0 
-				(get-arco-na-posicao (+ linha 1) col (get-arcos-horizontais tabuleiro))) 
-			1)
-    )
-  )
 )
 
 ;; verificar no tabuleiro quantas caixas fechadas
