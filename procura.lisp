@@ -85,40 +85,55 @@
 
 ;; ============ PERFORMANCE MEASURES ============
 
-;; Estrutura de dados a ser utilizada: (<solucao> <num-abertos> <num-fechados>)
+;; Estrutura de dados a ser utilizada: (<caminho-solucao> <n-abertos> <n-fechados>)
 
 ;; fator de ramificação média
-;; "funcao": num-nos-expandidos ou num-nos-expandidos-a*
-(defun fator-ramificacao-media (lista &optional (nos-expandidos (num-nos-expandidos lista)) (nos-gerados (num-nos-gerados lista)))
-"Retorna o fator de ramificação média"
-    
+(defun fator-ramificacao-media (lista &optional (L (num-nos-expandidos lista)) (valor-T (num-nos-gerados lista)) (margem-erro 0.1) (b-min 1) (b-max 10e11))
+"Retorna o fator de ramificacao media (c/ bisseccao)"
+    (let ((b-avg (/ (+ b-min b-max) 2)))
+        (cond ((< (- b-max b-min) margem-erro) (/ (+ b-max b-min) 2))
+              ((< (aux-ramificacao b-avg L valor-T) 0) (fator-ramificacao-media lista L valor-T margem-erro b-avg b-max))
+              (T (fator-ramificacao-media lista L valor-T margem-erro b-min b-avg))      
+        )
+    )
+)
+
+;; B + B^2 + ... + B^L = T
+(defun aux-ramificacao (B L valor-T)
+ "B + B^2 + ... + B^L = T"
+  (cond
+   ((= 1 L) (- B valor-T))
+   (T (+ (expt B L) (aux-ramificacao B (- L 1) valor-T)))
+  )
 )
 
 (defun tamanho-solucao (lista)
-"Retorna o tamanho da solução"
+"Retorna o tamanho da solucao"
     (length (car lista))
 )
 
 (defun num-nos-gerados (lista)
-"Retorna o número de nós gerados"
+"Retorna o numero de nos gerados"
     (+ (second lista) (third lista))
 )
 
-(defun num-nos-expandidos (lista &optional algoritmo)
-"Retorna o número de nós expandidos"
-    (cond ((or (eql algoritmo "bfs") (eql algoritmo "dfs")) (third lista))
-          ((eql algoritmo "a*") (fourth lista)) 
-            (T (third lista))
-    )
+(defun num-nos-expandidos (lista)
+"Retorna o numero de nos expandidos"
+    (third lista)
+)
+
+(defun num-nos-expandidos-a (lista)
+"Retorna o numero de nos expandidos (a*)"
+    (fourth lista)
 )
 
 (defun penetrancia (lista)
-"Calcula a penetrância"
+"Calcula a penetrancia"
     (/ (length (car lista)) (num-nos-gerados lista))
 )
 
 (defun no-solucao (lista)
-"Retorna o nó solução"
+"Retorna o no solucao"
     (nth (1- (length (car lista))) (car lista))
 )
 
