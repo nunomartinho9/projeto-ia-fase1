@@ -271,7 +271,7 @@
     (third lista)
 )
 
-(defun num-nos-expandidos-a (lista)
+(defun num-nos-expandidos-a* (lista)
 "Retorna o numero de nos expandidos (a*)"
     (fourth lista)
 )
@@ -284,11 +284,4 @@
 (defun no-solucao (lista)
 "Retorna o no solucao"
     (nth (1- (length (car lista))) (car lista))
-)
-
-(defun hora-atual ()
-"Retorna a hora atual (hh mm ss)"
-    (multiple-value-bind (s m h)
-            (get-decoded-time)
-        (list h m s))
 )
