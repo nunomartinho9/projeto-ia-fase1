@@ -1,20 +1,99 @@
 ;; Implementação dos algoritmos de procura.
 ;; Autores: Nuno Martinho & João Coelho.
 
-;; ============ SEARCH ALGORITHMS ============
 
 
 
-;; ============ FUNCÕES AUXILIARES NO ============
-;;<no>::= (<tabuleiro> <pai> <caixas-objetivo> <g> <h>)
+;; <no>::= (<tabuleiro> <pai> <caixas-objetivo> <g> <h>)
 ;; definir a estrutura da solucao
 ;; <solucao>::= (<camiho-solucao> <abertos> <fechados>)
 
+(defun no-teste () 
+    '(
+        (
+		    ((0)(0))  
+		    ((0)(0))    
+	    )
+        nil 1 0 0
+     )
+
+)
+
+(defun no-teste-2 () 
+    '(
+        (((0 0 0) (0 0 1) (0 1 1) (0 0 1))
+((0 0 0) (0 1 1) (1 0 1) (0 1 1)))
+        nil 3 0 0
+     )
+
+)
+
+(defun no-teste-3 () 
+    '(
+        (
+		    ((1)(1))  
+		    ((1)(1))    
+	    )
+        nil 1 0 0
+     )
+
+)
+;; ============ SEARCH ALGORITHMS ============
+;; o no inicial vai na lista de abertos
+;; (bfs 'expandir-no (list (no-teste)))
+(defun bfs (fnExpandir abertos &optional (fechados '()))
+    "Algoritmo de proucra em largura primeiro: Breadth-First-Search."
+    (cond 
+        ( (= (length abertos) 0) NIL)
+        (T
+            (let*
+                (
+                    (no-atual (car abertos))
+                    (sucessores (funcall fnExpandir no-atual))
+                )
+                ;;verificar se ha solucao
+                (cond
+                    (
+                        (or
+                            (= (- (get-no-objetivo no-atual) (calcular-caixas-fechadas (get-no-estado no-atual))) 0)
+                            (= (length sucessores) 0)
+                        )
+                        no-atual
+                        ;;(list (append (get-caminho-solucao no-atual) (get-no-estado no-atual)) (length abertos) (length fechados))
+                    )
+                    (T
+                        (bfs 
+                            fnExpandir 
+                            (append (cdr abertos) (remover-nil (remover-duplicados (remover-duplicados sucessores abertos) fechados))  ) 
+                            (append fechados (list no-atual))
+                        )
+                    )
+                )
+            )
+        )
+    )
+)
+
+(defun dfs (fnExpandir abertos &optional (fechados '()))
+    (print "mae do samuel")
+    
+)
+
+(defun A* ()
+    (print "mae do samuel")
+)
+;; ============ NOS ============
+
 ;; (criar-no (test-board) nil 1)
+;;( ( ((0)(0))  ((0)(1)) ) nil 1 0 0 )
+
+
 (defun criar-no (tabuleiro pai caixas-objetivo &optional (g 0) (h 0))
 "Constroi a estrutura do no."
   (list tabuleiro pai caixas-objetivo g h)
 )
+
+;; ============ SELETORES NOS ============
 
 (defun get-no-estado (no) 
  "Devolve o estado (tabuleiro) de um no."
@@ -31,7 +110,7 @@
     (nth 2 no)
 )
 
-(defun get-no-profundidade (no)
+(defun get-no-g (no)
     "Devolve o g (profundidade) de um no."
     (nth 3 no)
 )
@@ -43,47 +122,118 @@
 
 (defun get-no-f (no)
  "Calcula o valor de f (funcao avaliacao) de um no."
-    (+ (get-no-profundidade no) (get-no-h no))
+    (+ (get-no-g no) (get-no-h no))
 )
 
 
 ;; ============ GERAR NOS ============
+;; (gerar-nos-horizontal (no-teste))
+#|
+(
+  (
+    (((1) (0)) ((0) (1))) 
+    ((((0) (0)) ((0) (1))) NIL 1 0 0) 
+    1 1 0
+  )
+  (
+    (((0) (1)) ((0) (1))) 
+    ((((0) (0)) ((0) (1))) NIL 1 0 0) 
+    1 1 0
+  )
+)
+|#
 
-;; gerar um nó sucessor
-;; (gerar-no-sucessor (tabuleiro-teste) 1 1 'arco-horizontal)
-;; (gerar-no-sucessor (tabuleiro-teste) 1 1 'arco-vertical)
-;;                  FALTA DAR FIX
-(defun gerar-no-sucessor (no listPos arcPos funcao)
-    "Gerar um nó sucessor de um nó pai"
-    (let ((novoTabuleiro (get-no-estado no)))
-        (criar-no
-            (funcall funcao listPos arcPos novoTabuleiro)
-            no (get-no-objetivo no) (1+ (get-no-profundidade no)) (get-no-h no)
+(defun gerar-nos-horizontal (no &optional (linha 1) (col 1))
+    "Devolve os sucessores de um no, da parte horizontal do tabuleiro. (Começa no index 1)"
+    (cond 
+        ( (> col (count-colunas (get-no-estado no))) (gerar-nos-horizontal no (1+ linha)))
+		( (> linha (count-linhas (get-no-estado no))) '())
+        ( (= (get-arco-na-posicao (1- linha) (1- col) (get-arcos-horizontais (get-no-estado no) )) 1)  (gerar-nos-horizontal no linha (1+ col)))
+
+        (T
+            (cons 
+                (criar-no (arco-horizontal linha col (get-no-estado no)) no (get-no-objetivo no) (1+ (get-no-g no))) 
+                (gerar-nos-horizontal no linha (1+ col))
+            )    
+        )
+    )
+)
+;; (gerar-nos-vertical (no-teste))
+#|
+(
+  (
+    (((0) (0)) ((1) (1))) 
+    ((((0) (0)) ((0) (1))) NIL 1 0 0) 
+    1 1 0
+  )
+)
+ |#
+(defun gerar-nos-vertical (no &optional (linha 1) (col 1))
+    "Devolve os sucessores de um no, da parte vertical do tabuleiro. (Começa no index 1)"
+    (cond 
+        ( (> col (count-colunas (get-no-estado no))) (gerar-nos-vertical no (1+ linha)))
+		( (> linha (count-linhas (get-no-estado no))) '())
+        ( (= (get-arco-na-posicao (1- linha) (1- col) (get-arcos-verticais (get-no-estado no) )) 1)  (gerar-nos-vertical no linha (1+ col)))
+
+        (T
+            (cons 
+                (criar-no (arco-vertical col linha (get-no-estado no)) no (get-no-objetivo no) (1+ (get-no-g no))) 
+                (gerar-nos-vertical no linha (1+ col))
+            )    
         )
     )
 )
 
-;; gerar sucessores
-;; (expandir um no) gerar sucessores (expandir no) -> lista de sucessores de um no.
-;;                  NÃO TERMINADO
-(defun gerar-no-sucessores (no)
-    "Gerar nós sucessores de um nó"
-    (mapcar #'(lambda (tabuleiro)
-        (criar-no tabuleiro no (get-no-objetivo no) (1+ (get-no-profundidade no))))
-        (mapcar #'(lambda (posicao)
-            (arco-na-posicao (car posicao) (cadr posicao) (get-no-estado no)))
-            
+;; (expandir-no (no-teste))
+#|
+ (
+    ((((1) (0)) ((0) (1))) ((((0) (0)) ((0) (1))) NIL 1 0 0) 1 1 0)
+    ((((0) (1)) ((0) (1))) ((((0) (0)) ((0) (1))) NIL 1 0 0) 1 1 0)
+    ((((0) (0)) ((1) (1))) ((((0) (0)) ((0) (1))) NIL 1 0 0) 1 1 0)
+ )
+ |#
+(defun expandir-no (no)
+    "Expande um no e devolve os seus sucessores."
+    (append (gerar-nos-horizontal no) (gerar-nos-vertical no))
+)
+
+;; ============ SOLUCAO ============
+(defun get-caminho-solucao (no)
+    "Devolve uma lista de estados do no inicial ate ao no da solucao."
+    (cond
+        ( (null (get-no-pai no)) (list (get-no-estado no)))
+        (T
+           (append (get-caminho-solucao (get-no-pai no)) (list (get-no-estado no)) )
         )
     )
 )
 
 ;; ============ Funcoes auxiliares para procura ============
+(defun remover-duplicados (lista1 lista2)
+"Remove da lista1 os valores ja existentes na lista2"
+  (if (or (null lista1) (null lista2))
+      lista1
+      (mapcar #'(lambda(elm2) (if (existe-valor elm2 lista2) NIL elm2)) lista1)
+
+      
+  )
+)
+
+(defun existe-valor (valor lista)
+ "Devolve T ou NIL se o valor existe ou nao dentro da lista."
+  (eval (cons 'or (mapcar #'(lambda(elemento) (equal (get-no-estado valor) (get-no-estado elemento))) lista)))
+)
+
+(defun remover-nil (lista)
+    (apply #'append (mapcar #'(lambda(x) (if (null x) NIL (list x))) lista))
+)
+
 ;; remover nos repetidos de abertos e fechados
 ;; remover nil ????
 ;;
 
 
-;; ============ PERFORMANCE MEASURES ============
+;; ============ MEDIDAS DE DESEMPENHO ============
 
 ;; Estrutura de dados a ser utilizada: (<caminho-solucao> <n-abertos> <n-fechados>)
 
