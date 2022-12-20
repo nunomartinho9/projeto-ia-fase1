@@ -21,9 +21,9 @@
 
 (defun no-teste-2 () 
     '(
-(((0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 1 0 0 0 0 0) (0 1 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0))
-((0 0 0 0 0 0 0) (0 0 0 0 1 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0)))
-        nil 35 0 0
+(((0 0 0) (0 0 1) (0 1 1) (0 0 1))
+((0 0 0) (0 1 1) (1 0 1) (0 1 1)))
+        nil 3 0 0
      )
 
 )
@@ -92,8 +92,7 @@
                         (or
                             (= (- (get-no-objetivo no-atual) (calcular-caixas-fechadas (get-no-estado no-atual))) 0)
                             (= (length sucessores) 0)
-                        )
-
+                        )                      
                         (list (get-caminho-solucao no-atual) (length abertos) (length fechados))
 
                     )
@@ -106,8 +105,31 @@
     )
 )
 
-(defun A* ()
-    (print "mae do samuel")
+(defun a* (fnExpandir fnHeuristica abertos &optional (fechados '()) (numeroExpandidos 0))
+    "Algoritmo A*"
+    (cond 
+        ((= (length abertos) 0) NIL)
+        (T
+            (let*
+                (
+                    (no-atual (get-f-mais-baixo abertos))
+                    (sucessores (funcall fnExpandir no-atual fnHeuristica))
+                    (novos-fechados (trocar fechados) )
+                    (abertos-recalculados) ??????
+                    (novos-abertos (trocar fechados) ) ??????
+                )
+                (if (or
+                        (= (- (get-no-objetivo no-atual) (calcular-caixas-fechadas (get-no-estado no-atual))) 0) ;;ou ves que a heuristica é 0
+                        (= (length sucessores) 0)
+                    )
+                    (list (get-caminho-solucao no-atual) (length abertos) (length fechados) numeroExpandidos)
+                    (a* fnExpandir fnHeuristica abertos fechados (1+ numeroExpandidos) )
+                )
+
+            )
+        )
+    )
+
 )
 ;; ============ NOS ============
 
@@ -147,11 +169,29 @@
     (nth 4 no)
 )
 
-(defun get-no-f (no)
+(defun calcular-no-f (no)
  "Calcula o valor de f (funcao avaliacao) de um no."
     (+ (get-no-g no) (get-no-h no))
 )
 
+(defun get-f-mais-baixo (lista)
+    "Devolve o no com o f mais baixo de uma lista."
+    (cond
+        ((= (length lista) 1) (car lista))
+        (T
+            (let 
+            (
+                (outro-no ((get-f-mais-baixo (cdr lista))))
+            )
+            
+                (if (< (calcular-no-f (car lista)) (calcular-no-f outro-no))
+                    (car lista)
+                    outro-no
+                )
+            )
+        )
+    )
+)
 
 ;; ============ GERAR NOS ============
 ;; (gerar-nos-horizontal (no-teste))
@@ -224,6 +264,8 @@
     (append (gerar-nos-horizontal no) (gerar-nos-vertical no))
 )
 
+;; gerar children com heuristica
+
 ;; ============ SOLUCAO ============
 (defun get-caminho-solucao (no)
     "Devolve uma lista de estados do no inicial ate ao no da solucao."
@@ -259,6 +301,11 @@
 ;; remover nil ????
 ;;
 
+(defun heuristica-base (no)
+ "Heuristica dada no enunciado: h(x) = o(x) _ c(x) : o(x): objetivo de caixas do tabuleiro, c(x): numero de caixas fechadas"
+  (- (get-no-objetivo no) (calcular-caixas-fechadas (get-no-estado no)) )  
+
+)
 
 ;; ============ MEDIDAS DE DESEMPENHO ============
 
