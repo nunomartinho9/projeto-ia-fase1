@@ -77,7 +77,7 @@
                         (format t "~%|    Escolha o tabuleiro:    |")
                     )
                 )
-                (format t "~%|    ~a - Tabuleiro ~a         |" i i)
+                (format t "~%|    ~a - Tabuleiro ~a         |" i (code-char (+ i 64)))
                 (tabuleiros-menu (+ i 1) (cdr problemas))
             )
         )
@@ -94,7 +94,7 @@
                     (let ((lista (ler-tabuleiros)))
                         (if (or (< opcao 0) (> opcao (length lista)))
                             (progn 
-                                (format t "Escolha uma opcao valida!") (ler-tabuleiros menuVoltar)
+                                (format t "Escolha uma opcao valida!") (opcao-tabuleiro 'tabuleiros-menu)
                             )
                             (list opcao (nth (1- opcao) lista))
                         )
