@@ -265,7 +265,7 @@
 ;; Estrutura de dados a ser utilizada: (<caminho-solucao> <n-abertos> <n-fechados>)
 
 ;; fator de ramificação média
-(defun fator-ramificacao-media (lista &optional (L (num-nos-expandidos lista)) (valor-T (num-nos-gerados lista)) (margem-erro 0.1) (b-min 1) (b-max 10e11))
+(defun fator-ramificacao-media (lista &optional (L (tamanho-solucao lista)) (valor-T (num-nos-gerados lista)) (margem-erro 0.1) (b-min 1) (b-max 10e11))
 "Retorna o fator de ramificacao media (c/ bisseccao)"
     (let ((b-avg (/ (+ b-min b-max) 2)))
         (cond ((< (- b-max b-min) margem-erro) (/ (+ b-max b-min) 2))

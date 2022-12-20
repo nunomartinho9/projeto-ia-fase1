@@ -1,6 +1,16 @@
 ;; Carrega os outros ficheiros de código, escreve e lê ficheiros, e trata da interação com o utilizador.
 ;; Autores: Nuno Martinho & João Coelho.
 
+#|
+    Objetivos pedidos no enunciado
+        Tabuleiro A - 3 caixas
+        Tabuleiro B - 7 caixas
+        Tabuleiro C - 10 caixas
+        Tabuleiro D - 10 caixas
+        Tabuleiro E - 20 caixas
+        Tabuleiro F - 35 caixas
+|#
+
 ;; ============ CARREGAR FICHEIROS ============
 
 (load "procura.lisp")
@@ -58,7 +68,13 @@
                     )
                     ('2 (progn
                             (let ((solucao (opcao-algoritmo)))
-                                (print-tabuleiros (caadr solucao))
+                                (progn
+                                    (format t "~%Tabuleiro ~a" (first solucao))
+                                    (format t "~%  - Algoritmo ~a" (second solucao))
+                                    (format t "~%  - Objetivo: ~a" (third solucao))
+                                    (format t "~%  - Solucao:")
+                                    (print-tabuleiro (car (fourth solucao)))
+                                )
                             )
                             (iniciar)
                         )
@@ -208,15 +224,13 @@
                     (T (let* (
                                 (no-tabuleiro (opcao-tabuleiro 'opcao-algoritmo))
                                 (objetivo (opcao-objetivo))
-                                (id-tabuleiro (first no-tabuleiro))
+                                (id-tabuleiro (code-char (+ (first no-tabuleiro) 64)))
                                 (tabuleiro (second no-tabuleiro))
                                 (no (list (criar-no tabuleiro nil objetivo))) 
                             )
                         (ecase opcao
                             (1
-                                (let(
-                                        (solucao (list id-tabuleiro 'BFS objetivo (bfs 'expandir-no no) (hora-atual) (hora-atual)))
-                                    )
+                                (let ((solucao (list id-tabuleiro 'BFS objetivo (bfs 'expandir-no no) (hora-atual) (hora-atual))))
                                     (progn (ficheiro-estatisticas solucao) solucao)
                                 )
                             )
@@ -282,18 +296,22 @@
         (format nil "~a:~a:~a" h m s))
 )
 
-(defun estatisticas-bfs (stream id-tabuleiro objetivo algoritmo caminho-solucao hora-inicio hora-fim &optional profundidade)
+(defun estatisticas-bfs (stream id-tabuleiro algoritmo objetivo caminho-solucao hora-inicio hora-fim &optional profundidade)
 "Solução e dados de eficiência para o algoritmo BFS"
     (progn
-        (format stream "~% Tabuleiro ~a" id-tabuleiro)
-        (format stream "~%  - Algoritmo: ~a" algoritmo)
-        (format stream "~%  - Objetivo: ~a caixas" objetivo)
-        (format stream "~%  - Solução encontrada")
+        (format stream "~%Tabuleiro ~a" id-tabuleiro)
+        (format stream "~% - Algoritmo: ~a" algoritmo)
+        (format stream "~% - Objetivo: ~a caixas" objetivo)
+        (format stream "~% - Solução encontrada")
         (print-tabuleiro (no-solucao caminho-solucao) stream)
-        (format stream "~%  - Fator de ramificação média: ~f" (fator-ramificacao-media caminho-solucao))
-        (format stream "~%  - Nº nós gerados: ~a" (num-nos-gerados caminho-solucao))
-        (format stream "~%  - Nº nós expandidos: ~a" (num-nos-expandidos caminho-solucao))
-        (format stream "~%  - Penetrância: ~f" (penetrancia caminho-solucao))
-        (format stream "~%  - Início: ~a Fim: ~a" hora-inicio hora-fim)
+        (format stream "~% - Fator de ramificação média: ~f" (fator-ramificacao-media caminho-solucao))
+        (if (eql algoritmo 'DFS)
+            (format stream "~% - Profundidade: ~a" (profundidade))
+        )
+        (format stream "~% - Nº nós gerados: ~a" (num-nos-gerados caminho-solucao))
+        (format stream "~% - Nº nós expandidos: ~a" (num-nos-expandidos caminho-solucao))
+        (format stream "~% - Penetrância: ~f" (penetrancia caminho-solucao))
+        (format stream "~% - Início: ~a" hora-inicio)
+        (format stream "~% - Fim: ~a~%~%" hora-fim)
     )
 )
