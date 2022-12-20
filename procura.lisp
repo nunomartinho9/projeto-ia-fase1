@@ -21,9 +21,9 @@
 
 (defun no-teste-2 () 
     '(
-        (((0 0 0) (0 0 1) (0 1 1) (0 0 1))
-((0 0 0) (0 1 1) (1 0 1) (0 1 1)))
-        nil 3 0 0
+(((0 0 1 0) (1 1 1 1) (0 0 1 1) (0 0 1 1) (0 0 1 1))
+((0 0 1 1) (0 0 1 1) (1 1 1 1) (1 0 1 1) (0 1 1 1)))
+        nil 7 0 0
      )
 
 )
@@ -58,8 +58,7 @@
                             (= (- (get-no-objetivo no-atual) (calcular-caixas-fechadas (get-no-estado no-atual))) 0)
                             (= (length sucessores) 0)
                         )
-                        no-atual
-                        ;;(list (append (get-caminho-solucao no-atual) (get-no-estado no-atual)) (length abertos) (length fechados))
+                        (list (get-caminho-solucao no-atual) (length abertos) (length fechados))
                     )
                     (T
                         (bfs 
