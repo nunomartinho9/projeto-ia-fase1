@@ -12,7 +12,7 @@
     '(
         (
 		    ((0)(0))  
-		    ((0)(0))    
+		    ((0)(1))    
 	    )
         nil 1 0 0
      )
@@ -21,9 +21,9 @@
 
 (defun no-teste-2 () 
     '(
-(((0 0 1 0) (1 1 1 1) (0 0 1 1) (0 0 1 1) (0 0 1 1))
-((0 0 1 1) (0 0 1 1) (1 1 1 1) (1 0 1 1) (0 1 1 1)))
-        nil 7 0 0
+(((0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 1 0 0 0 0 0) (0 1 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0))
+((0 0 0 0 0 0 0) (0 0 0 0 1 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0)))
+        nil 35 0 0
      )
 
 )
@@ -58,7 +58,9 @@
                             (= (- (get-no-objetivo no-atual) (calcular-caixas-fechadas (get-no-estado no-atual))) 0)
                             (= (length sucessores) 0)
                         )
+
                         (list (get-caminho-solucao no-atual) (length abertos) (length fechados))
+
                     )
                     (T
                         (bfs 
@@ -73,9 +75,35 @@
     )
 )
 
-(defun dfs (fnExpandir abertos &optional (fechados '()))
-    (print "mae do samuel")
-    
+;; (dfs 'expandir-no 3 (list (no-teste)))
+(defun dfs (fnExpandir maxProfundidade abertos &optional (fechados '()))   
+   "Algoritmo de proucra em profundidade primeiro: Depth-First-Search."
+    (cond 
+        ( (= (length abertos) 0) NIL)
+        ( (> (get-no-g (car abertos) ) maxProfundidade) (dfs fnExpandir maxProfundidade (cdr abertos) (append fechados (list (car abertos)))))
+        (T
+            (let* 
+                (
+                    (no-atual (car abertos))
+                    (sucessores (funcall fnExpandir no-atual))
+                )
+                (cond
+                    (
+                        (or
+                            (= (- (get-no-objetivo no-atual) (calcular-caixas-fechadas (get-no-estado no-atual))) 0)
+                            (= (length sucessores) 0)
+                        )
+
+                        (list (get-caminho-solucao no-atual) (length abertos) (length fechados))
+
+                    )
+                    (T
+                        (dfs fnExpandir maxProfundidade (append sucessores (cdr abertos)) (append fechados (list no-atual)))
+                    )
+                )
+            )
+        )
+    )
 )
 
 (defun A* ()

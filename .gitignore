@@ -1,6 +1,7 @@
 help.bat
 listener.bat
 run.bat
+temp.lisp
 *.FASL
 *.fasl
 *.lisp-temp
