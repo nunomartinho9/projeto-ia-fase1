@@ -27,8 +27,55 @@
      )
 
 )
-;; ============ SEARCH ALGORITHMS ============
 
+(defun no-teste-3 () 
+    '(
+        (
+		    ((1)(1))  
+		    ((1)(1))    
+	    )
+        nil 1 0 0
+     )
+
+)
+;; ============ SEARCH ALGORITHMS ============
+;; o no inicial vai na lista de abertos
+;; (bfs 'expandir-no (list (no-teste)))
+(defun bfs (fnExpandir abertos &optional (fechados '()))
+    "Algoritmo de proucra em largura primeiro: Breadth-First-Search."
+    (cond 
+        ( (= (length abertos) 0) NIL)
+        (T
+            (let*
+                (
+                    (no-atual (car abertos))
+                    (sucessores (funcall fnExpandir no-atual))
+                )
+                ;;verificar se ha solucao
+                
+                (if (and 
+                        (= (- (get-no-objetivo no-atual) (calcular-caixas-fechadas (get-no-estado no-atual))) 0)
+                        (= (length sucessores) 0)
+                    )
+                    (list (get-caminho-solucao no-atual) (length abertos) (length fechados))
+                    (bfs 
+                        fnExpandir 
+                        (append (cdr abertos) (remove-valores-duplicados (remove-valores-duplicados sucessores abertos) fechados)  ) 
+                        (append fechados no-atual)
+                    )
+                )
+            )
+        )
+    )
+)
+
+(defun dfs (fnExpandir abertos &optional (fechados '()))
+    (print "mae do samuel")
+)
+
+(defun A* ()
+    (print "mae do samuel")
+)
 ;; ============ NOS ============
 
 ;; (criar-no (test-board) nil 1)
@@ -39,6 +86,8 @@
 "Constroi a estrutura do no."
   (list tabuleiro pai caixas-objetivo g h)
 )
+
+;; ============ SELETORES NOS ============
 
 (defun get-no-estado (no) 
  "Devolve o estado (tabuleiro) de um no."
@@ -96,7 +145,10 @@
         ( (= (get-arco-na-posicao (1- linha) (1- col) (get-arcos-horizontais (get-no-estado no) )) 1)  (gerar-nos-horizontal no linha (1+ col)))
 
         (T
-            (cons (criar-no (arco-horizontal linha col (get-no-estado no)) no (get-no-objetivo no) (1+ (get-no-g no))) (gerar-nos-horizontal no linha (1+ col)))    
+            (cons 
+                (criar-no (arco-horizontal linha col (get-no-estado no)) no (get-no-objetivo no) (1+ (get-no-g no))) 
+                (gerar-nos-horizontal no linha (1+ col))
+            )    
         )
     )
 )
@@ -139,7 +191,33 @@
     (append (gerar-nos-horizontal no) (gerar-nos-vertical no))
 )
 
+;; ============ SOLUCAO ============
+(defun get-caminho-solucao (no)
+    "Devolve uma lista de estados do no inicial ate ao no da solucao."
+    (cond
+        ( (null (get-no-pai no)) (list (get-no-estado no)))
+        (T
+           (append (get-caminho-solucao (get-no-pai no)) (list (get-no-estado no)) )
+        )
+    )
+)
+
 ;; ============ Funcoes auxiliares para procura ============
+(defun remove-valores-duplicados (lista1 lista2)
+"Remove da lista1 os valores ja existentes na lista2"
+  (if (or (null lista1) (null lista2))
+      lista1
+      (mapcar #'(lambda(elm1) (if (null elm1) NIL (list elm1))) 
+        (mapcar #'(lambda(elm2) (if (existe-valor elm2 lista2) NIL elm2)) lista1)
+      )
+  )
+)
+
+(defun existe-valor (valor lista)
+ "Devolve T ou NIL se o valor existe ou nao dentro da lista."
+  (eval (cons 'or (mapcar #'(lambda(elemento) (equal (get-no-estado valor) (get-no-estado elemento))) lista)))
+)
+
 ;; remover nos repetidos de abertos e fechados
 ;; remover nil ????
 ;;

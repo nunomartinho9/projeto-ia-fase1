@@ -114,7 +114,8 @@
 		( (= (get-arco-na-posicao (1- listPos) (1- arcPos) (get-arcos-horizontais tabuleiro)) 1) NIL)
 		(T 
 			(list (arco-na-posicao listPos arcPos (get-arcos-horizontais tabuleiro) x) 
-				  (get-arcos-verticais tabuleiro)) 
+				  (get-arcos-verticais tabuleiro)
+			) 
 		)
 	)
 
@@ -177,16 +178,16 @@
 )
 
 ;; verificar no tabuleiro quantas caixas fechadas
-(defun contar-caixas-fechadas (tabuleiro &optional (linha 0) (col 0))
+(defun calcular-caixas-fechadas (tabuleiro &optional (linha 0) (col 0))
 	"Devolve o numero de caixas fechadas num tabuleiro. (começa no index 0)"
 	(cond
-		( (>= col (count-colunas tabuleiro)) (contar-caixas-fechadas tabuleiro (1+ linha)))
+		( (>= col (count-colunas tabuleiro)) (calcular-caixas-fechadas tabuleiro (1+ linha)))
 		( (>= linha (count-linhas tabuleiro)) 0)
 		(T
 			(+ 
 				(if (existe-caixa-fechada linha col tabuleiro) 1 0)
 
-				(contar-caixas-fechadas tabuleiro linha (1+ col))
+				(calcular-caixas-fechadas tabuleiro linha (1+ col))
 			)
 		)
 	)
