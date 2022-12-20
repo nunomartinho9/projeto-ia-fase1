@@ -12,7 +12,7 @@
     '(
         (
 		    ((0)(0))  
-		    ((0)(1))    
+		    ((0)(0))    
 	    )
         nil 1 0 0
      )
@@ -21,9 +21,9 @@
 
 (defun no-teste-2 () 
     '(
-(((0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 1 0 0 0 0 0) (0 1 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0))
-((0 0 0 0 0 0 0) (0 0 0 0 1 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0)))
-        nil 5 0 0
+        (((0 0 0) (0 0 1) (0 1 1) (0 0 1))
+((0 0 0) (0 1 1) (1 0 1) (0 1 1)))
+        nil 3 0 0
      )
 
 )
@@ -52,16 +52,21 @@
                     (sucessores (funcall fnExpandir no-atual))
                 )
                 ;;verificar se ha solucao
-                
-                (if (and 
-                        (= (- (get-no-objetivo no-atual) (calcular-caixas-fechadas (get-no-estado no-atual))) 0)
-                        (= (length sucessores) 0)
+                (cond
+                    (
+                        (or
+                            (= (- (get-no-objetivo no-atual) (calcular-caixas-fechadas (get-no-estado no-atual))) 0)
+                            (= (length sucessores) 0)
+                        )
+                        no-atual
+                        ;;(list (append (get-caminho-solucao no-atual) (get-no-estado no-atual)) (length abertos) (length fechados))
                     )
-                    (list (get-caminho-solucao no-atual) (length abertos) (length fechados))
-                    (bfs 
-                        fnExpandir 
-                        (append (cdr abertos) (remove-valores-duplicados (remove-valores-duplicados sucessores abertos) fechados)  ) 
-                        (append fechados no-atual)
+                    (T
+                        (bfs 
+                            fnExpandir 
+                            (append (cdr abertos) (remover-nil (remover-duplicados (remover-duplicados sucessores abertos) fechados))  ) 
+                            (append fechados (list no-atual))
+                        )
                     )
                 )
             )
@@ -71,6 +76,7 @@
 
 (defun dfs (fnExpandir abertos &optional (fechados '()))
     (print "mae do samuel")
+    
 )
 
 (defun A* ()
@@ -203,19 +209,23 @@
 )
 
 ;; ============ Funcoes auxiliares para procura ============
-(defun remove-valores-duplicados (lista1 lista2)
+(defun remover-duplicados (lista1 lista2)
 "Remove da lista1 os valores ja existentes na lista2"
   (if (or (null lista1) (null lista2))
       lista1
-      (mapcar #'(lambda(elm1) (if (null elm1) NIL (list elm1))) 
-        (mapcar #'(lambda(elm2) (if (existe-valor elm2 lista2) NIL elm2)) lista1)
-      )
+      (mapcar #'(lambda(elm2) (if (existe-valor elm2 lista2) NIL elm2)) lista1)
+
+      
   )
 )
 
 (defun existe-valor (valor lista)
  "Devolve T ou NIL se o valor existe ou nao dentro da lista."
   (eval (cons 'or (mapcar #'(lambda(elemento) (equal (get-no-estado valor) (get-no-estado elemento))) lista)))
+)
+
+(defun remover-nil (lista)
+    (apply #'append (mapcar #'(lambda(x) (if (null x) NIL (list x))) lista))
 )
 
 ;; remover nos repetidos de abertos e fechados
