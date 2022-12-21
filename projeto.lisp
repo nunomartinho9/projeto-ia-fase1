@@ -2,7 +2,7 @@
 ;; Autores: Nuno Martinho & João Coelho.
 
 #|
-    Objetivos pedidos no enunciado
+    Testes
         Tabuleiro A - 3 caixas
         Tabuleiro B - 7 caixas
         Tabuleiro C - 10 caixas
@@ -73,7 +73,7 @@
                                     (format t "~%  - Algoritmo ~a" (second solucao))
                                     (format t "~%  - Objetivo: ~a" (third solucao))
                                     (format t "~%  - Solucao:")
-                                    (print-tabuleiro (car (fourth solucao)))
+                                    (print-tabuleiro (car (fifth solucao)))
                                 )
                             )
                             (iniciar)
@@ -161,7 +161,8 @@
 "Mostra uma mensagem para escolher a profundidade"
     (progn
         (format t "~%o                                                o")
-        (format t "~%|      - Defina a profundidade a utilizar -      |")
+        (format t "~%|        - Defina a profundidade maxima -        |")
+        (format t "~%|                 - a utilizar -                 |")
         (format t "~%|                                                |")
         (format t "~%|                  0 - Voltar                    |")
         (format t "~%o                                                o")
@@ -171,12 +172,12 @@
 
 ;; ============= MENU OPÇÕES =============
 
-(defun opcao-tabuleiro (menuVoltar)
+(defun opcao-tabuleiro (voltar)
 "Recebe um tabuleiro do menu"
     (progn 
         (tabuleiros-menu)
         (let ((opcao (read)))
-            (cond ((equal opcao '0) (funcall menuVoltar))
+            (cond ((equal opcao '0) (funcall voltar))
                   ((not (numberp opcao)) (progn (format t "Escolha uma opção válida~%")))
                   (T
                     (let ((lista (ler-tabuleiros)))
@@ -198,7 +199,7 @@
     (progn 
         (objetivo-menu)
         (let ((opcao (read)))
-            (cond ((equal opcao '0) (opcao-objetivo))
+            (cond ((equal opcao '0) (opcao-tabuleiro 'tabuleiros-menu))
                   ((or (not (numberp opcao)) (< opcao 0))
                     (progn
                         (format t "Escolha uma opção válida!~%")
@@ -212,13 +213,13 @@
 )
 
 ;; FUNCAO INACABADA - FALTAM METER AS FUNCOES DOS ALGORITMOS
-;; <solucao>::= (<id-tabuleiro> <algoritmo> <objetivo> <caminho-solucao> <profundidade> <hora-inicio> <hora-fim>)
+;; <solucao>::= (<id-tabuleiro> <algoritmo> <objetivo> <hora-inicio> <caminho-solucao> <hora-fim> <profundidade>)
 (defun opcao-algoritmo ()
 "Recebe a opção de algoritmo do utilizador e executa-o"
     (progn
         (algoritmos-menu)
         (let ((opcao (read)))
-            (cond ((equal opcao '0) (funcall menuVoltar))
+            (cond ((equal opcao '0) (funcall voltar))
                     ((or (< opcao 0) (> opcao 4)) (progn (format t "Escolha uma opção válida!~%") (opcao-algoritmo)))
                     ((not (numberp opcao)) (progn (format t "Escolha uma opção válida!~%")))
                     (T (let* (
@@ -230,11 +231,24 @@
                             )
                         (ecase opcao
                             (1
-                                (let ((solucao (list id-tabuleiro 'BFS objetivo (bfs 'expandir-no no) (hora-atual) (hora-atual))))
-                                    (progn (ficheiro-estatisticas solucao) solucao)
+                                (let ((solucao (list id-tabuleiro 'BFS objetivo (hora-atual) (bfs 'expandir-no no) (hora-atual))))
+                                    (progn 
+                                        (ficheiro-estatisticas solucao) 
+                                        solucao
+                                    )
                                 )
                             )
-                            (2)
+                            (2
+                                (let* (
+                                        (profundidade (opcao-profundidade))
+                                        (solucao (list id-tabuleiro 'DFS objetivo (hora-atual) (dfs 'expandir-no profundidade no) (hora-atual) profundidade))
+                                    )
+                                    (progn
+                                        (ficheiro-estatisticas solucao)
+                                        solucao
+                                    )
+                                )
+                            )
                             (3)
                             (4)
                         )
@@ -246,10 +260,10 @@
 
 (defun opcao-profundidade ()
 "Recebe um valor de profundidade do utilizador"
-    (if (not 'profundidade-menu)
+    (if (not (profundidade-menu))
         (let ((opcao (read)))
-            (cond ((equal opcao '0) (opcao-algoritmo))
-                  ((or (not (numberp opcao) (< opcao 0)))
+            (cond ((equal opcao '0) (opcao-objetivo))
+                  ((or (not (numberp opcao)) (< opcao 0))
                     (progn
                         (format t "Escolha uma opção válida!~%")
                         (opcao-profundidade 'profundidade-menu)
@@ -264,7 +278,7 @@
 
 ;; ============= ESTATISTICAS =============
 
-;; <solucao>::= (<id-tabuleiro> <algoritmo> <objetivo> <caminho-solucao> <profundidade> <hora-inicio> <hora-fim>)
+;; <solucao>::= (<id-tabuleiro> <algoritmo> <objetivo> <hora-inicio> <caminho-solucao> <profundidade> <hora-fim>)
 
 ;;(ficheiro-estatisticas '("solucao" "A" "BFS" (hora-atual) (hora-atual)))
 (defun ficheiro-estatisticas (solucao)
@@ -273,15 +287,16 @@
             (id-tabuleiro (first solucao))
             (algoritmo (second solucao))
             (objetivo (third solucao))
-            (caminho-solucao (fourth solucao))
-            (hora-inicio (fifth solucao))
+            (hora-inicio (fourth solucao))
+            (caminho-solucao (fifth solucao))
             (hora-fim (sixth solucao))
+            (profundidade (seventh solucao))
            )
 
         (with-open-file (file "resultados.dat" :direction :output :if-does-not-exist :create :if-exists :append)
             (ecase algoritmo
                 ('bfs (estatisticas-bfs file id-tabuleiro algoritmo objetivo caminho-solucao hora-inicio hora-fim))
-                ('dfs ())
+                ('dfs (estatisticas-bfs file id-tabuleiro algoritmo objetivo caminho-solucao hora-inicio hora-fim profundidade))
                 ('a* ())
                 ('ida* ())
             )
@@ -297,16 +312,16 @@
 )
 
 (defun estatisticas-bfs (stream id-tabuleiro algoritmo objetivo caminho-solucao hora-inicio hora-fim &optional profundidade)
-"Solução e dados de eficiência para o algoritmo BFS"
+"Solução e dados de eficiência para o algoritmo BFS e DFS"
     (progn
         (format stream "~%Tabuleiro ~a" id-tabuleiro)
         (format stream "~% - Algoritmo: ~a" algoritmo)
         (format stream "~% - Objetivo: ~a caixas" objetivo)
         (format stream "~% - Solução encontrada")
         (print-tabuleiro (no-solucao caminho-solucao) stream)
-        (format stream "~% - Fator de ramificação média: ~f" (fator-ramificacao-media caminho-solucao))
+        ;;(format stream "~% - Fator de ramificação média: ~f" (fator-ramificacao-media caminho-solucao))
         (if (eql algoritmo 'DFS)
-            (format stream "~% - Profundidade: ~a" (profundidade))
+            (format stream "~% - Profundidade máxima: ~a" profundidade)
         )
         (format stream "~% - Nº nós gerados: ~a" (num-nos-gerados caminho-solucao))
         (format stream "~% - Nº nós expandidos: ~a" (num-nos-expandidos caminho-solucao))
