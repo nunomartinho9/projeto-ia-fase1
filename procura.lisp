@@ -94,6 +94,7 @@
 )
 
 ;; (dfs 'expandir-no 3 (list (no-teste)))
+;; (((((0) (0)) ((0) (1))) (((1) (0)) ((0) (1))) (((1) (1)) ((0) (1))) (((1) (1)) ((1) (1)))) 4 3)
 (defun dfs (fnExpandir maxProfundidade abertos &optional (fechados '()))   
    "Algoritmo de proucra em profundidade primeiro: Depth-First-Search."
     (cond 
@@ -121,6 +122,7 @@
 
 
 ;; (a* 'expandir-no-a* 'heuristica-base (list (no-teste)))
+;; (((((0) (0)) ((0) (1))) (((0) (0)) ((1) (1))) (((0) (1)) ((1) (1))) (((1) (1)) ((1) (1)))) 2 5 5)
 (defun a* (fnExpandir fnHeuristica abertos &optional (fechados '()) (numeroExpandidos 0))
     "Algoritmo A*" 
     (cond 
@@ -148,9 +150,11 @@
 
 ;; ============ AUXILIARES PARA A* ============
 
+;; (recalcular-abertos abertos sucessores pai)
+;; 
 (defun recalcular-abertos (abertos sucessores no-pai)
     "Recebe uma lista de nos abertos, lista de nos expandidos e o no pai
-    Se algum no expandido existe em abertos, ficam os nos com o menor valor de f e trocamos o pai, e retornamos os novos abertos"
+    Se algum no expandido existe em abertos, ficam o no com o menor valor de f e trocamos o pai, e retornamos os novos abertos"
     (mapcar 
         #'(lambda (no-aberto)
             (let ( (novos-abertos (recalcular-no no-aberto sucessores) ) )
@@ -162,6 +166,8 @@
           ) abertos)
 )
 
+;; (recalcular-fechados abertos sucessores pai)
+;; 
 (defun recalcular-fechados (fechados sucessores no-pai)
     "Recebe uma lista de nos fechados, lista de nos expandidos e o no pai
     Se algum no expandido existe em fechados, ficam os nos com o menor valor de f e trocamos o pai, 
@@ -177,6 +183,8 @@
           ) fechados)
 )
 
+;; (recalcular-no no sucessores)
+;; 
 (defun recalcular-no (no sucessores)
     "Se o no dado existir na lista de nos expandidos, altera-se o no da lista com o menor valor de f entre os 2."
     (remover-nil
@@ -194,19 +202,23 @@
     )
 )
 
+;; (novo-valor-f no novoG novoH)
+;;
 (defun novo-valor-f (no novoG novoH)
     "Calcula o novo valor de f de um no e devolve esse no."
     (substituir '5 (substituir '4 no novoG) novoH)
 )
 
-;; funfa
+;; (trocar-no-pai no novoPai)
+;;
 (defun trocar-no-pai (no novoPai)
     "Troca o pai de um no, Devolve o no com o novo pai."
     (substituir '2 no novoPai)
 )
 
 ;; ============ AUXILIARES PARA ALGORITMOS DE PROCURA ============
-;; atencao no remver nil
+
+
 (defun remover-duplicados (lista1 lista2)
 "Remove da lista1 os valores ja existentes na lista2"
   (if (or (null lista1) (null lista2))
@@ -221,7 +233,8 @@
 )
 
 (defun remover-nil (lista)
-    (apply #'append (mapcar #'(lambda(x) (if (null x) NIL (list x))) lista))
+    "Remove os Nils de uma lista e a devolve."
+    (apply #'append (mapcar #'(lambda(elem) (if (null elem) NIL (list elem))) lista))
 )
 
 (defun get-caminho-solucao (no)
@@ -399,9 +412,9 @@
 
 )
 
-(defun heuristica-top-xuxa (no)
+(defun heuristica-top (no)
     "Heuristica criada pelos autores. WORK IN PROGRESS"
-    (print "heuristica-top-xuxa")
+    (print "heuristica-top")
 )
 
 ;; ============ MEDIDAS DE DESEMPENHO ============
