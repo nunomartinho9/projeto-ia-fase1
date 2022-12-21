@@ -3,6 +3,7 @@ listener.bat
 run.bat
 temp.lisp
 resultados.dat
+/manuais/images/
 *.FASL
 *.fasl
 *.lisp-temp

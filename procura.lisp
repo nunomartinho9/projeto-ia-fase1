@@ -410,18 +410,18 @@
 ;; <solucao-a*>::= (<caminho-solucao> <n-abertos> <n-fechados> <n-nos-expandidos>)
 
 ;; fator de ramificação média
-(defun fator-ramificacao-media (lista &optional (L (tamanho-solucao lista)) (valor-T (num-nos-gerados lista)) (B-min 1) (B-max 10))
-"Retorna o fator de ramificacao media (c/ bisseccao)"
+(defun fator-ramificacao-media (lista &optional (L (tamanho-solucao lista)) (valor-T (num-nos-gerados lista)) (B-min 0) (B-max valor-T) (margem 0.1))
+"Retorna o fator de ramificacao media (metodo bisseccao)"
     (let ((B-avg (/ (+ B-min B-max) 2)))
-        (cond ((< (- B-max B-min) 0.1) (/ (+ B-max B-min) 2))
-              ((< (aux-ramificacao B-avg L valor-T) 0) (fator-ramificacao-media lista L valor-T B-avg B-max))
-              (T (fator-ramificacao-media lista L valor-T B-min B-avg))   
+        (cond ((< (- B-max B-min) margem) (/ (+ B-max B-min) 2))
+              ((< (aux-ramificacao B-avg L valor-T) 0) (fator-ramificacao-media lista L valor-T B-avg B-max margem))
+              (T (fator-ramificacao-media lista L valor-T B-min B-avg margem))   
         )
     )
 )
 
 ;; B + B^2 + ... + B^L = T
-(defun aux-ramificacao (B L valor-T) ;; B (average) = 5.0E11 / L = 11 / T = 96
+(defun aux-ramificacao (B L valor-T)
   (cond
     ((= 1 L) (- B valor-T))
     (T (+ (expt B L) (aux-ramificacao B (- L 1) valor-T)))

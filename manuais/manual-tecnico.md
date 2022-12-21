@@ -1,66 +1,47 @@
-;; Carrega os outros ficheiros de código, escreve e lê ficheiros, e trata da interação com o utilizador.
-;; Autores: Nuno Martinho & João Coelho.
+# **Projeto N.º 1** - *Dots and Boxes*
 
-#|
-    Testes
-        Tabuleiro A - 3 caixas
-        Tabuleiro B - 7 caixas
-        Tabuleiro C - 10 caixas
-        Tabuleiro D - 10 caixas
-        Tabuleiro E - 20 caixas
-        Tabuleiro F - 35 caixas
-|#
+Inteligência Artificial - Escola Superior de Tecnologia de Setúbal
+2022/2023   
 
-;; ============ CARREGAR FICHEIROS ============
+## ***Manual Técnico***
+___
+Nuno Martinho, n.º 201901769  
+João Coelho, n.º 201902001
 
-(load "procura.lisp")
-(load "puzzle.lisp")
+### **Introdução**  
+___
+Neste manual técnico é abordada a implementação de um programa em *LISP* que tem como objetivo resolver tabuleiros do jogo *Dots and Boxes*.  
+O objetivo deste é permitir que o utilizador possa receber uma solução possível do número de jogadas num tabuleiro de modo a completar o objetivo de caixas fechadas.  
 
+### **Organização do projeto**  
+___
+O projeto encontra-se organizado em 3 ficheiros de código:  
 
-;; ============= INPUT/OUTPUT =============
+- **projeto.lisp** - carrega os outros ficheiros de código, escreve e lê ficheiros, e trata da interação com o utilizador.  
+- **puzzle.lisp** - implementação da resolução do problema.  
+- **procura.lisp** - implementação dos algoritmos de procura.  
 
-;; (ler-tabuleiros)
-(defun ler-tabuleiros ()
-"Le os tabuleiros no ficheiro problemas.dat"
-    (with-open-file (stream "problemas.dat" :if-does-not-exist nil)
-        (do ((result nil (cons next result))
-                (next (read stream nil 'eof) (read stream nil 'eof)))
-                    ((equal next 'eof) (reverse result))
-        )
-    )
-)
+### **projeto.lisp**
+___
+Neste ficheiro encontram-se funções relativas ao carregamento, leitura e escrita de ficheiros, bem como à interação com o utilizador.  
+O programa é iniciado ao executar a função ***iniciar*** que apresenta um menu principal com 3 opções:  
 
-;; (print-tabuleiro (ler-tabuleiros))
-(defun print-tabuleiro (tabuleiro &optional (stream t))
-"Imprime um tabuleiro do ficheiro problemas.dat"
-    (not (null (mapcar #'(lambda (l)
-        (format stream "~%~t~t ~a" l)) tabuleiro))
-    )
-    (format t "~%")
-)
+1. mostar um tabuleiro entre todos os disponíveis no ficheiro ***problemas.dat***
+2. resolver um tabuleiro
+3. sair do programa.
 
-;; (print-tabuleiros (ler-tabuleiros))
-(defun print-tabuleiros (tabuleiros &optional (stream t))
-"Imprime os tabuleiros do ficheiro problemas.dat"
-    (not (null (mapcar #'(lambda (tabuleiro)
-        (format stream "~%~t~t ~a" (print-tabuleiro tabuleiro))) tabuleiros))
-    )
-    (format t "~%")
-)
-
-
-;; ============= START =============
-
+```lisp
+;; Função iniciar
 (defun iniciar ()
 "Inicializa o programa"
     (menu)
     (let ((opcao (read)))
-        (if 
+        (if
             (or (not (numberp opcao)) (< opcao 1) (> opcao 3))
                 (progn (format t "Escolha uma opção válida!") (iniciar))
                 (ecase opcao
-                    ('1 (progn 
-                            (let ((tabuleiro (opcao-tabuleiro 'iniciar))) 
+                    ('1 (progn
+                            (let ((tabuleiro (opcao-tabuleiro 'iniciar)))
                                 (if (listp tabuleiro) (print-tabuleiro (second tabuleiro)))
                             )
                             (iniciar)
@@ -84,26 +65,30 @@
         )
     )
 )
+```
 
-;; ============= MENUS =============
+Menu principal  
+![menu iniciar](./images/main_menu.png)
 
-(defun menu ()
-"Mostra o menu inicial"
-    (progn
-        (format t "~%A carregar jogo...~%")
-        (sleep 1)
-        (format t "~%o                              o")
-        (format t "~%|      - Dots and Boxes -      |")
-        (format t "~%|                              |")
-        (format t "~%|   1 - Visualizar problemas   |")
-        (format t "~%|   2 - Resolver um problema   |")
-        (format t "~%|   3 - Sair                   |")
-        (format t "~%o                              o")
-        (format t "~%~%>> ")
+Para que seja possível apresentar os tabuleiros contidos no ficheiro ***problemas.dat*** é usada uma função ***ler-tabuleiros*** para ler esse mesmo ficheiro.
+
+```lisp
+;; Função ler-tabuleiros
+(defun ler-tabuleiros ()
+"Le os tabuleiros no ficheiro problemas.dat"
+    (with-open-file (stream "problemas.dat" :if-does-not-exist nil)
+        (do ((result nil (cons next result))
+                (next (read stream nil 'eof) (read stream nil 'eof)))
+                    ((equal next 'eof) (reverse result))
+        )
     )
 )
+```
 
+Ao selecionar a primeira opção *Visualizar problemas* o utilizador verá então no ecrã uma lista com todos os tabuleiros lidos a partir da função anterior. Poderá depois selecionar um dos tabuleiros para poder ver o mesmo impresso no ecrã.  
 
+```lisp
+;; Função tabuleiros-menu: apresenta os tabuleiros ao utilizador
 (defun tabuleiros-menu (&optional (i 1) (problemas (ler-tabuleiros)))
 "Mostra os tabuleiros disponíveis no menu"
     (cond ((null problemas) 
@@ -128,52 +113,10 @@
         )
     )
 )
+```
 
-(defun objetivo-menu ()
-"Mostra uma mensagem para escolher o numero de caixas fechadas"
-    (progn
-        (format t "~%o                                                o")
-        (format t "~%|     - Defina o numero de caixas fechadas -     |")
-        (format t "~%|                                                |")
-        (format t "~%|                  0 - Voltar                    |")
-        (format t "~%o                                                o")
-        (format t "~%~%>> ")
-    )
-)
-
-
-(defun algoritmos-menu ()
-"Mostra os algoritmos disponiveis no menu"
-    (progn
-        (format t "~%o                                   o")
-        (format t "~%|      - Escolha o algoritmo -      |")
-        (format t "~%|                                   |")
-        (format t "~%|         1 - Breadth-First         |")
-        (format t "~%|          2 - Depth-First          |")
-        (format t "~%|              3 - A*               |")
-        (format t "~%|             4 - IDA*              |")
-        (format t "~%|                                   |")
-        (format t "~%|            0 - Voltar             |")
-        (format t "~%o                                   o")
-        (format t "~%~%>> ")
-    )
-)
-
-(defun profundidade-menu ()
-"Mostra uma mensagem para escolher a profundidade"
-    (progn
-        (format t "~%o                                                o")
-        (format t "~%|        - Defina a profundidade maxima -        |")
-        (format t "~%|                 - a utilizar -                 |")
-        (format t "~%|                                                |")
-        (format t "~%|                  0 - Voltar                    |")
-        (format t "~%o                                                o")
-        (format t "~%~%>> ")
-    )
-)
-
-;; ============= MENU OPÇÕES =============
-
+```lisp
+;; Função opcao-tabuleiro: permite ao utilizador escolher um tabuleiro
 (defun opcao-tabuleiro (voltar)
 "Recebe um tabuleiro do menu"
     (progn 
@@ -195,27 +138,26 @@
         )
     )
 )
+```
 
-(defun opcao-objetivo ()
-"Recebe um valor de caixas fechadas do utilizador"
-    (progn 
-        (objetivo-menu)
-        (let ((opcao (read)))
-            (cond ((equal opcao '0) (opcao-tabuleiro 'tabuleiros-menu))
-                  ((or (not (numberp opcao)) (< opcao 0))
-                    (progn
-                        (format t "Escolha uma opção válida!~%")
-                        (opcao-objetivo)
-                    )
-                  )
-                  (T opcao)
-            )
-        )
-    )
-)
+Menu tabuleiros  
+![menu tabuleiros](./images/menu_tabuleiros.png)
 
-;; FUNCAO INACABADA - FALTAM METER AS FUNCOES DOS ALGORITMOS
-;; <solucao>::= (<id-tabuleiro> <algoritmo> <objetivo> <hora-inicio> <caminho-solucao> <hora-fim> <profundidade>)
+Voltando ao menu principal, temos a segunda opção do menu ***Resolver um problema*** que permite ao utilizador escolher um algortimo, um tabuleiro, o objetivo de caixas fechadas e, se aplicável, profundidade máxima. No fim, é calculada a solução e apresentada no ecrã do utilizador, voltando de seguida ao menu inicial.
+
+Também é criado ou ficheiro ***resultados.dat*** com resultados mais detalhados de todas as execuções realizadas.
+
+Menu algoritmos  
+![menu algoritmos](./images/menu_algoritmos.png)
+
+Menu Objetivo Caixas Fechadas  
+![menu_objetivo](./images/caixas_fechadas.png)
+
+Menu Profundidade  
+![menu_profundidade](./images/menu_profundidade.png)
+
+```lisp
+;; Função opcao-algoritmo: trata a opção de algoritmo do utilizador
 (defun opcao-algoritmo ()
 "Recebe a opção de algoritmo do utilizador e executa-o"
     (progn
@@ -258,30 +200,11 @@
         )
     )
 )
+```
 
-(defun opcao-profundidade ()
-"Recebe um valor de profundidade do utilizador"
-    (if (not (profundidade-menu))
-        (let ((opcao (read)))
-            (cond ((equal opcao '0) (opcao-objetivo))
-                  ((or (not (numberp opcao)) (< opcao 0))
-                    (progn
-                        (format t "Escolha uma opção válida!~%")
-                        (opcao-profundidade 'profundidade-menu)
-                    )
-                  )
-                  (T opcao)
-            )
-        )
-    )
-)
+```lisp
+;;; Funções auxiliares para criação do ficheiro output resultados.dat
 
-
-;; ============= ESTATISTICAS =============
-
-;; <solucao>::= (<id-tabuleiro> <algoritmo> <objetivo> <hora-inicio> <caminho-solucao> <profundidade> <hora-fim>)
-
-;;(ficheiro-estatisticas '("solucao" "A" "BFS" (hora-atual) (hora-atual)))
 (defun ficheiro-estatisticas (solucao)
 "Ficheiro de resultados estatisticos (solucao + dados estatisticos sobre a eficiencia)"
     (let* (
@@ -320,7 +243,7 @@
         (format stream "~% - Objetivo: ~a caixas" objetivo)
         (format stream "~% - Solução encontrada")
         (print-tabuleiro (no-solucao caminho-solucao) stream)
-        (format stream "~% - Fator de ramificação média: ~f" (fator-ramificacao-media caminho-solucao))
+        ;;(format stream "~% - Fator de ramificação média: ~f" (fator-ramificacao-media caminho-solucao))
         (if (eql algoritmo 'DFS)
             (format stream "~% - Profundidade máxima: ~a" profundidade)
         )
@@ -331,3 +254,7 @@
         (format stream "~% - Fim: ~a~%~%" hora-fim)
     )
 )
+```
+
+### **puzzle.lisp**
+
