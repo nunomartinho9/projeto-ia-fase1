@@ -1,33 +1,76 @@
 ;; Implementação dos algoritmos de procura.
 ;; Autores: Nuno Martinho & João Coelho.
-;; <no>::= (<tabuleiro> <pai> <caixas-objetivo> <g> <h>)
 
+;; <no>::= (<tabuleiro> <pai> <caixas-objetivo> <g> <h>)
+;; ============ PROBLEMAS PARA TESTE ============
 (defun no-teste () 
     '(
         (
 		    ((0)(0))  
 		    ((0)(1))    
 	    )
-        nil 1 0 1
+        nil 1 0 0
      )
 
 )
 
 (defun problema-a ()
     '(
-(((0 0 0) (0 0 1) (0 1 1) (0 0 1))
-((0 0 0) (0 1 1) (1 0 1) (0 1 1)))
-        nil 1 0 1
+        (((0 0 0) (0 0 1) (0 1 1) (0 0 1))
+        ((0 0 0) (0 1 1) (1 0 1) (0 1 1)))
+        nil 3 0 1
      )
 )
+
+(defun problema-b ()
+    '(
+        (((0 0 1 0) (1 1 1 1) (0 0 1 1) (0 0 1 1) (0 0 1 1))
+        ((0 0 1 1) (0 0 1 1) (1 1 1 1) (1 0 1 1) (0 1 1 1)))
+        nil 7 0 1
+     )
+)
+
+(defun problema-c ()
+    '(
+        (((0 0 1 0) (1 0 1 1) (0 0 1 1) (0 0 1 1) (0 0 1 1))
+        ((0 0 1 1) (0 0 1 1) (0 0 1 1) (1 0 1 1) (0 1 1 1)))
+        nil 10 0 1
+     )
+)
+
+(defun problema-d ()
+    '(
+        (((0 0 0 0 0) (0 0 0 0 0) (0 0 0 0 0) (0 0 0 0 0) (0 0 0 0 0))
+        ((0 0 0 0 0) (0 0 0 0 0) (0 0 0 0 0) (0 0 0 0 0) (0 0 0 0 0)))
+        nil 10 0 1
+     )
+)
+
+(defun problema-e ()
+    '(
+        (((0 0 0 1 0 0) (0 0 0 1 1 1) (1 1 1 1 1 0) (0 0 0 1 1 0) (0 0 0 1 1 0) (0 0 1 1 1 1) (0 0 1 1 1 1))
+        ((0 0 0 1 1 1) (0 1 0 0 1 1) (0 1 1 0 1 1) (0 0 1 1 0 0) (1 0 1 0 1 0) (0 0 1 1 0 0) (0 1 1 1 1 1)))
+        nil 20 0 1
+     )
+)
+
+(defun problema-f ()
+    '(
+        (((0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 1 0 0 0 0 0) (0 1 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0))
+        ((0 0 0 0 0 0 0) (0 0 0 0 1 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0) (0 0 0 0 0 0 0)))
+        nil 35 0 1
+     )
+)
+
 
 ;; ============ ALGORITMOS DE PROCURA ============
 ;; o no inicial vai na lista de abertos
 
 
 ;; (bfs 'expandir-no (list (no-teste)))
+;; (((((0) (0)) ((0) (1))) (((1) (0)) ((0) (1))) (((1) (1)) ((0) (1))) (((1) (1)) ((1) (1)))) 1 7)
 (defun bfs (fnExpandir abertos &optional (fechados '()))
-    "Algoritmo de proucra em largura primeiro: Breadth-First-Search."
+    "Algoritmo de procura em largura primeiro: Breadth-First-Search."
     (cond 
         ( (= (length abertos) 0) NIL)
         (T
@@ -79,13 +122,13 @@
 
 ;; (a* 'expandir-no-a* 'heuristica-base (list (no-teste)))
 (defun a* (fnExpandir fnHeuristica abertos &optional (fechados '()) (numeroExpandidos 0))
-    "Algoritmo A*"
+    "Algoritmo A*" 
     (cond 
         ((= (length abertos) 0) NIL)
         (T
             (let*
                 (
-                    (no-atual (get-f-mais-baixo abertos))
+                    (no-atual (substituir '5 (get-f-mais-baixo abertos) (funcall fnHeuristica (get-f-mais-baixo abertos))) )
                     (sucessores (funcall fnExpandir no-atual fnHeuristica))
                     (novos-fechados (recalcular-fechados fechados sucessores no-atual) )    ;; recalcular f dos abertos
                     (novos-abertos (recalcular-abertos (cdr abertos) sucessores no-atual) ) ;; recalcular f dos fechados
