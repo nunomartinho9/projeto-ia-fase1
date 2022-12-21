@@ -399,9 +399,9 @@
 
 )
 
-(defun heuristica-top-xuxa (no)
+(defun heuristica-top (no)
     "Heuristica criada pelos autores. WORK IN PROGRESS"
-    (print "heuristica-top-xuxa")
+    (print "heuristica-top")
 )
 
 ;; ============ MEDIDAS DE DESEMPENHO ============

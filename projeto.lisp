@@ -267,8 +267,8 @@
                             )
                             (3
                                 (let* (
-                                        (heuristica (opcao-heuristica no))
-                                        (solucao (list id-tabuleiro 'A* objetivo (hora-atual) (a* 'expandir-no heuristica no) (hora-atual)))
+                                        (heuristica (opcao-heuristica))
+                                        (solucao (list id-tabuleiro 'A* objetivo (hora-atual) (a* 'expandir-no-a* heuristica no) (hora-atual)))
                                     )
                                     (progn
                                         (ficheiro-estatisticas solucao)
@@ -300,7 +300,7 @@
     )
 )
 
-(defun opcao-heuristica (no)
+(defun opcao-heuristica ()
 "Recebe um valor que cooresponde a heuristica escolhida pelo utilizador"
     (if (not (heuristica-menu))
         (let ((opcao (read)))
@@ -313,10 +313,10 @@
                   )
                   (T (ecase opcao
                         (1
-                            (heuristica-base no)
+                            'heuristica-base
                         )
                         (2
-                            (heuristica-top no)
+                            'heuristica-top
                         )
                   ))
             )

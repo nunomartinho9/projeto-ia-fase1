@@ -149,7 +149,6 @@
 ;; NIL
 ;;(existe-caixa-fechada 1 0 (tabuleiro-teste-simples))
 ;; NIL
-;; isto ta uma cagada mas funciona vamos melhorar depois
 (defun existe-caixa-fechada (linha coluna tabuleiro) 
 	"Verifica num determinado arco com as suas coordenadas, se existe uma caixa fechada num tabuleiro"
 	
@@ -178,6 +177,8 @@
 )
 
 ;; verificar no tabuleiro quantas caixas fechadas
+;; (calcular-caixas-fechadas (tabuleiro-teste))
+;; 1
 (defun calcular-caixas-fechadas (tabuleiro &optional (linha 0) (col 0))
 	"Devolve o numero de caixas fechadas num tabuleiro. (começa no index 0)"
 	(cond
