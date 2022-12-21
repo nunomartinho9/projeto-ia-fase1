@@ -151,7 +151,6 @@
         (format t "~%|         1 - Breadth-First         |")
         (format t "~%|          2 - Depth-First          |")
         (format t "~%|              3 - A*               |")
-        (format t "~%|             4 - IDA*              |")
         (format t "~%|                                   |")
         (format t "~%|            0 - Voltar             |")
         (format t "~%o                                   o")
