@@ -413,8 +413,8 @@
 )
 
 (defun heuristica-top (no)
-    "Heuristica criada pelos autores. WORK IN PROGRESS"
-    (print "heuristica-top")
+    "Heuristica criada pelos autores. NAO ESTA FEITO."
+    (* (- (get-no-objetivo no) (calcular-caixas-fechadas (get-no-estado no)) )  2)
 )
 
 ;; ============ MEDIDAS DE DESEMPENHO ============
