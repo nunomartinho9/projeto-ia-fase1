@@ -805,7 +805,9 @@ A heurística que nos foi fornecida não é eficiente para ser utilizada no algo
 
 ___
 
-A principal limitação é a falta de memória do *LispWorks* / *clisp* que impossibilita a resolução, através do algoritmo *BFS* e *A* * (com a heurística que nos foi fornecida), dos tabuleiros maiores com poucos ou nenhuns arcos preenchidos.
+A principal limitação é a falta de memória do *LispWorks* / *clisp* que impossibilita a resolução, através do algoritmo *BFS* e *A* * (com a heurística que nos foi fornecida), dos tabuleiros maiores com poucos ou nenhuns arcos preenchidos por defeito.
+
+Outra limitação é o utilizador não puder introduzir um número maior de caixas a fechar do que aquele proposto no enunciado para cada tabuleiro.
 
 Todos os requisitos base enumerados no enunciado foram implementados à exceção de:
 
