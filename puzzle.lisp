@@ -61,12 +61,12 @@
 ;; (1 0 0)
 ;; (substituir 2 (car (get-arcos-verticais (tabuleiro-teste))) 2) -> (0 1 0)
 ;; (0 2 0)
-(defun substituir (index arcsList &optional (x 1))
-	"Função que recebe um índice (começa no 1), uma lista e valor x e deverá substituir o elemento nessa posição pelo valor x"
+(defun substituir (posicao lista &optional (valor 1))
+	"Função que recebe uma posicao (começa no 1), uma lista e valor opcional e deverá substituir o elemento nessa posição pelo valor"
 	(cond 
-		((= (- index 1) 0) (cons x (cdr arcsList)))
+		((= (- posicao 1) 0) (cons valor (cdr lista)))
 		
-		(T (cons (car arcsList) (substituir (- index 1) (cdr arcsList) x)))
+		(T (cons (car lista) (substituir (- posicao 1) (cdr lista) valor)))
 	)
 )
 
@@ -194,5 +194,3 @@
 
 
 )
-
-;; calcular quantas caixas ainda faltam fechar (obj - closed) nao fazer por enquanto
