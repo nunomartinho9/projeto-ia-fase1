@@ -194,5 +194,3 @@
 
 
 )
-
-;; calcular quantas caixas ainda faltam fechar (obj - closed) nao fazer por enquanto

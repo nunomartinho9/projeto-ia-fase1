@@ -8,30 +8,19 @@
 		    ((0)(0))  
 		    ((0)(1))    
 	    )
-        nil 1 0 0
+        nil 1 0 1
      )
 
 )
 
-(defun no-teste-2 () 
+(defun problema-a ()
     '(
 (((0 0 0) (0 0 1) (0 1 1) (0 0 1))
 ((0 0 0) (0 1 1) (1 0 1) (0 1 1)))
-        nil 3 0 0
+        nil 1 0 1
      )
-
 )
 
-(defun no-teste-3 () 
-    '(
-        (
-		    ((1)(1))  
-		    ((1)(1))    
-	    )
-        nil 1 0 0
-     )
-
-)
 ;; ============ ALGORITMOS DE PROCURA ============
 ;; o no inicial vai na lista de abertos
 
@@ -48,22 +37,12 @@
                     (sucessores (funcall fnExpandir no-atual))
                 )
                 ;;verificar se ha solucao
-                (cond
-                    (
-                        (or
-                            (= (- (get-no-objetivo no-atual) (calcular-caixas-fechadas (get-no-estado no-atual))) 0)
-                            (= (length sucessores) 0)
-                        )
-
-                        (list (get-caminho-solucao no-atual) (length abertos) (length fechados))
-
-                    )
-                    (T
-                        (bfs 
-                            fnExpandir 
-                            (append (cdr abertos) (remover-nil (remover-duplicados (remover-duplicados sucessores abertos) fechados))  ) 
-                            (append fechados (list no-atual))
-                        )
+                (if (verificar-solucao no-atual sucessores)
+                    (list (get-caminho-solucao no-atual) (length abertos) (length fechados))
+                    (bfs 
+                        fnExpandir 
+                        (append (cdr abertos) (remover-nil (remover-duplicados (remover-duplicados sucessores abertos) fechados))  ) 
+                        (append fechados (list no-atual))
                     )
                 )
             )
@@ -83,17 +62,13 @@
                     (no-atual (car abertos))
                     (sucessores (funcall fnExpandir no-atual))
                 )
-                (cond
-                    (
-                        (or
-                            (= (- (get-no-objetivo no-atual) (calcular-caixas-fechadas (get-no-estado no-atual))) 0)
-                            (= (length sucessores) 0)
-                        )                      
-                        (list (get-caminho-solucao no-atual) (length abertos) (length fechados))
-
-                    )
-                    (T
-                        (dfs fnExpandir maxProfundidade (append sucessores (cdr abertos)) (append fechados (list no-atual)))
+                (if (verificar-solucao no-atual sucessores) 
+                    (list (get-caminho-solucao no-atual) (length abertos) (length fechados))
+                    (dfs 
+                        fnExpandir 
+                        maxProfundidade 
+                        (append sucessores (cdr abertos))
+                        (append fechados (list no-atual))
                     )
                 )
             )
@@ -102,7 +77,7 @@
 )
 
 
-;; WIP
+;; (a* 'expandir-no-a* 'heuristica-base (list (no-teste)))
 (defun a* (fnExpandir fnHeuristica abertos &optional (fechados '()) (numeroExpandidos 0))
     "Algoritmo A*"
     (cond 
@@ -112,16 +87,13 @@
                 (
                     (no-atual (get-f-mais-baixo abertos))
                     (sucessores (funcall fnExpandir no-atual fnHeuristica))
-                    (novos-fechados (trocar fechados) )
-                    (abertos-recalculados) ??????
-                    (novos-abertos (trocar fechados) ) ??????
+                    (novos-fechados (recalcular-fechados fechados sucessores no-atual) )    ;; recalcular f dos abertos
+                    (novos-abertos (recalcular-abertos (cdr abertos) sucessores no-atual) ) ;; recalcular f dos fechados
+                    (abertos-com-novos-fechados (remover-nil (append novos-abertos (remover-duplicados sucessores novos-abertos) novos-fechados))) ;;passar os novos fechados para abertos
                 )
-                (if (or
-                        (= (- (get-no-objetivo no-atual) (calcular-caixas-fechadas (get-no-estado no-atual))) 0) ;;ou ves que a heuristica é 0
-                        (= (length sucessores) 0)
-                    )
+                (if (verificar-solucao no-atual sucessores)
                     (list (get-caminho-solucao no-atual) (length abertos) (length fechados) numeroExpandidos)
-                    (a* fnExpandir fnHeuristica abertos fechados (1+ numeroExpandidos) )
+                    (a* fnExpandir fnHeuristica abertos-com-novos-fechados (remover-duplicados (append fechados (list no-atual)) novos-fechados) (1+ numeroExpandidos) )
                 )
 
             )
@@ -131,24 +103,72 @@
 )
 
 
-;; ============ AUXILIARES PARA ALGORITMOS DE PROCURA ============
+;; ============ AUXILIARES PARA A* ============
 
+(defun recalcular-abertos (abertos sucessores no-pai)
+    "Recebe uma lista de nos abertos, lista de nos expandidos e o no pai
+    Se algum no expandido existe em abertos, ficam os nos com o menor valor de f e trocamos o pai, e retornamos os novos abertos"
+    (mapcar 
+        #'(lambda (no-aberto)
+            (let ( (novos-abertos (recalcular-no no-aberto sucessores) ) )
+                (if (null novos-abertos) 
+                    no-aberto 
+                    (trocar-no-pai (car novos-abertos) no-pai)
+                )
+            )
+          ) abertos)
+)
+
+(defun recalcular-fechados (fechados sucessores no-pai)
+    "Recebe uma lista de nos fechados, lista de nos expandidos e o no pai
+    Se algum no expandido existe em fechados, ficam os nos com o menor valor de f e trocamos o pai, 
+    e retornamos os novos fechados para passarem em abertos"
+    (mapcar 
+        #'(lambda (no-fechado)
+            (let ( (novos-fechados (recalcular-no no-fechado sucessores) ) )
+                (if (null novos-fechados) 
+                    NIL 
+                    (trocar-no-pai (car novos-fechados) no-pai)
+                )
+            )
+          ) fechados)
+)
+
+(defun recalcular-no (no sucessores)
+    "Se o no dado existir na lista de nos expandidos, altera-se o no da lista com o menor valor de f entre os 2."
+    (remover-nil
+        (mapcar
+            #'(lambda(no-sucessor)
+                (if (equal (get-no-estado no) (get-no-estado no-sucessor)) 
+                    (if (<= (calcular-no-f no-sucessor) (calcular-no-f no) )
+                        (novo-valor-f no (get-no-g no-sucessor) (get-no-h no-sucessor))
+                        nil
+                    )
+                    nil
+                )
+            
+            ) sucessores)
+    )
+)
 
 (defun novo-valor-f (no novoG novoH)
     "Calcula o novo valor de f de um no e devolve esse no."
     (substituir '5 (substituir '4 no novoG) novoH)
 )
 
+;; funfa
 (defun trocar-no-pai (no novoPai)
     "Troca o pai de um no, Devolve o no com o novo pai."
     (substituir '2 no novoPai)
 )
 
+;; ============ AUXILIARES PARA ALGORITMOS DE PROCURA ============
+;; atencao no remver nil
 (defun remover-duplicados (lista1 lista2)
 "Remove da lista1 os valores ja existentes na lista2"
   (if (or (null lista1) (null lista2))
       lista1
-      (mapcar #'(lambda(elm2) (if (existe-valor elm2 lista2) NIL elm2)) lista1)  
+      (remover-nil (mapcar #'(lambda(elm2) (if (existe-valor elm2 lista2) NIL elm2)) lista1) ) 
   )
 )
 
@@ -168,6 +188,15 @@
         (T
            (append (get-caminho-solucao (get-no-pai no)) (list (get-no-estado no)) )
         )
+    )
+)
+
+(defun verificar-solucao (no sucessores)
+    "Verificacao booleana se o no dado e a solucao, Devolve T se uma das condicoes for verdade
+    Caso contrario devolve NIL."
+    (or
+        (= (- (get-no-objetivo no) (calcular-caixas-fechadas (get-no-estado no))) 0)
+        (= (length sucessores) 0)
     )
 )
 
@@ -203,6 +232,8 @@
     (+ (get-no-g no) (get-no-h no))
 )
 
+;; (get-f-mais-baixo '(((((1) (0)) ((0) (1))) ((((0) (0)) ((0) (1))) NIL 1 0 0) 1 1 4) ((((0) (1)) ((0) (1))) ((((0) (0)) ((0) (1))) NIL 1 0 0) 1 1 2) ((((0) (0)) ((1) (1))) ((((0) (0)) ((0) (1))) NIL 1 0 0) 1 1 1))
+;; ((((0) (0)) ((1) (1))) ((((0) (0)) ((0) (1))) NIL 1 0 0) 1 1 1)
 (defun get-f-mais-baixo (lista)
     "Devolve o no com o f mais baixo de uma lista."
     (cond
@@ -210,7 +241,7 @@
         (T
             (let 
             (
-                (outro-no ((get-f-mais-baixo (cdr lista))))
+                (outro-no (get-f-mais-baixo (cdr lista)))
             )
             
                 (if (< (calcular-no-f (car lista)) (calcular-no-f outro-no))
@@ -222,12 +253,15 @@
     )
 )
 
-
-
 ;; ============ EXPANSAO DE NOS ============
 
 ;; (expandir-no-a* (no-teste) 'heuristica-base)
+#| (((((1) (0)) ((0) (1))) ((((0) (0)) ((0) (1))) NIL 1 0 0) 1 1 1)
+ ((((0) (1)) ((0) (1))) ((((0) (0)) ((0) (1))) NIL 1 0 0) 1 1 1)
+((((0) (0)) ((1) (1))) ((((0) (0)) ((0) (1))) NIL 1 0 0) 1 1 1)) |#
+
 (defun expandir-no-a* (no-atual fnHeuristica)
+    "Expande o no e calcula a sua heuristica"
     (mapcar 
         #'(lambda (no) (substituir '5 no (funcall fnHeuristica no)))
         (expandir-no no-atual)
@@ -305,7 +339,6 @@
     )
 )
 
-
 ;; (criar-no (test-board) nil 1)
 ;;( ( ((0)(0))  ((0)(1)) ) nil 1 0 0 )
 (defun criar-no (tabuleiro pai caixas-objetivo &optional (g 0) (h 0))
@@ -315,6 +348,8 @@
 
 ;; ============ HEURISTICAS ============
 
+;; (heuristica-base '((((0)(0)) ((0)(1))) nil 1 0 0))
+;; 1
 (defun heuristica-base (no)
  "Heuristica dada no enunciado: h(x) = o(x) _ c(x) : o(x): objetivo de caixas do tabuleiro, c(x): numero de caixas fechadas"
   (- (get-no-objetivo no) (calcular-caixas-fechadas (get-no-estado no)) )  
