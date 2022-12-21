@@ -108,8 +108,10 @@
 "Mostra os tabuleiros disponíveis no menu"
     (cond ((null problemas) 
             (progn
+                (format t "~%|                                |")
+                (format t "~%|        0 - Voltar atras        |") 
                 (format t "~%o                                o")
-                (format t "~%~% 0 - Voltar atras") (format t "~%~%>> ")
+                (format t "~%~%>> ")
             )
         )
         (T (progn
@@ -219,7 +221,7 @@
     (progn
         (algoritmos-menu)
         (let ((opcao (read)))
-            (cond ((equal opcao '0) (funcall voltar))
+            (cond ((equal opcao '0) (iniciar))
                     ((or (< opcao 0) (> opcao 4)) (progn (format t "Escolha uma opção válida!~%") (opcao-algoritmo)))
                     ((not (numberp opcao)) (progn (format t "Escolha uma opção válida!~%")))
                     (T (let* (
@@ -250,7 +252,6 @@
                                 )
                             )
                             (3)
-                            (4)
                         )
                     ))
             )
@@ -295,8 +296,8 @@
 
         (with-open-file (file "resultados.dat" :direction :output :if-does-not-exist :create :if-exists :append)
             (ecase algoritmo
-                ('bfs (estatisticas-bfs file id-tabuleiro algoritmo objetivo caminho-solucao hora-inicio hora-fim))
-                ('dfs (estatisticas-bfs file id-tabuleiro algoritmo objetivo caminho-solucao hora-inicio hora-fim profundidade))
+                ('bfs (estatisticas file id-tabuleiro algoritmo objetivo caminho-solucao hora-inicio hora-fim))
+                ('dfs (estatisticas file id-tabuleiro algoritmo objetivo caminho-solucao hora-inicio hora-fim profundidade))
                 ('a* ())
                 ('ida* ())
             )
@@ -311,15 +312,15 @@
         (format nil "~a:~a:~a" h m s))
 )
 
-(defun estatisticas-bfs (stream id-tabuleiro algoritmo objetivo caminho-solucao hora-inicio hora-fim &optional profundidade)
-"Solução e dados de eficiência para o algoritmo BFS e DFS"
+(defun estatisticas (stream id-tabuleiro algoritmo objetivo caminho-solucao hora-inicio hora-fim &optional profundidade)
+"Solução e dados de eficiência para os algoritmos"
     (progn
         (format stream "~%Tabuleiro ~a" id-tabuleiro)
         (format stream "~% - Algoritmo: ~a" algoritmo)
         (format stream "~% - Objetivo: ~a caixas" objetivo)
         (format stream "~% - Solução encontrada")
         (print-tabuleiro (no-solucao caminho-solucao) stream)
-        ;;(format stream "~% - Fator de ramificação média: ~f" (fator-ramificacao-media caminho-solucao))
+        (format stream "~% - Fator de ramificação média: ~f" (fator-ramificacao-media caminho-solucao))
         (if (eql algoritmo 'DFS)
             (format stream "~% - Profundidade máxima: ~a" profundidade)
         )
