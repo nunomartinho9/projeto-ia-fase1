@@ -1,12 +1,6 @@
 ;; Implementação dos algoritmos de procura.
 ;; Autores: Nuno Martinho & João Coelho.
-
-
-
-
 ;; <no>::= (<tabuleiro> <pai> <caixas-objetivo> <g> <h>)
-;; definir a estrutura da solucao
-;; <solucao>::= (<camiho-solucao> <abertos> <fechados>)
 
 (defun no-teste () 
     '(
@@ -38,8 +32,10 @@
      )
 
 )
-;; ============ SEARCH ALGORITHMS ============
+;; ============ ALGORITMOS DE PROCURA ============
 ;; o no inicial vai na lista de abertos
+
+
 ;; (bfs 'expandir-no (list (no-teste)))
 (defun bfs (fnExpandir abertos &optional (fechados '()))
     "Algoritmo de proucra em largura primeiro: Breadth-First-Search."
@@ -105,6 +101,8 @@
     )
 )
 
+
+;; WIP
 (defun a* (fnExpandir fnHeuristica abertos &optional (fechados '()) (numeroExpandidos 0))
     "Algoritmo A*"
     (cond 
@@ -131,18 +129,49 @@
     )
 
 )
-;; ============ NOS ============
-
-;; (criar-no (test-board) nil 1)
-;;( ( ((0)(0))  ((0)(1)) ) nil 1 0 0 )
 
 
-(defun criar-no (tabuleiro pai caixas-objetivo &optional (g 0) (h 0))
-"Constroi a estrutura do no."
-  (list tabuleiro pai caixas-objetivo g h)
+;; ============ AUXILIARES PARA ALGORITMOS DE PROCURA ============
+
+
+(defun novo-valor-f (no novoG novoH)
+    "Calcula o novo valor de f de um no e devolve esse no."
+    (substituir '5 (substituir '4 no novoG) novoH)
 )
 
-;; ============ SELETORES NOS ============
+(defun trocar-no-pai (no novoPai)
+    "Troca o pai de um no, Devolve o no com o novo pai."
+    (substituir '2 no novoPai)
+)
+
+(defun remover-duplicados (lista1 lista2)
+"Remove da lista1 os valores ja existentes na lista2"
+  (if (or (null lista1) (null lista2))
+      lista1
+      (mapcar #'(lambda(elm2) (if (existe-valor elm2 lista2) NIL elm2)) lista1)  
+  )
+)
+
+(defun existe-valor (valor lista)
+ "Devolve T ou NIL se o valor existe ou nao dentro da lista."
+  (eval (cons 'or (mapcar #'(lambda(elemento) (equal (get-no-estado valor) (get-no-estado elemento))) lista)))
+)
+
+(defun remover-nil (lista)
+    (apply #'append (mapcar #'(lambda(x) (if (null x) NIL (list x))) lista))
+)
+
+(defun get-caminho-solucao (no)
+    "Devolve uma lista de estados do no inicial ate ao no da solucao."
+    (cond
+        ( (null (get-no-pai no)) (list (get-no-estado no)))
+        (T
+           (append (get-caminho-solucao (get-no-pai no)) (list (get-no-estado no)) )
+        )
+    )
+)
+
+;; ============ SELETORES ============
 
 (defun get-no-estado (no) 
  "Devolve o estado (tabuleiro) de um no."
@@ -193,7 +222,31 @@
     )
 )
 
-;; ============ GERAR NOS ============
+
+
+;; ============ EXPANSAO DE NOS ============
+
+;; (expandir-no-a* (no-teste) 'heuristica-base)
+(defun expandir-no-a* (no-atual fnHeuristica)
+    (mapcar 
+        #'(lambda (no) (substituir '5 no (funcall fnHeuristica no)))
+        (expandir-no no-atual)
+    )
+)
+
+;; (expandir-no (no-teste))
+#|
+ (
+    ((((1) (0)) ((0) (1))) ((((0) (0)) ((0) (1))) NIL 1 0 0) 1 1 0)
+    ((((0) (1)) ((0) (1))) ((((0) (0)) ((0) (1))) NIL 1 0 0) 1 1 0)
+    ((((0) (0)) ((1) (1))) ((((0) (0)) ((0) (1))) NIL 1 0 0) 1 1 0)
+ )
+ |#
+(defun expandir-no (no)
+    "Expande um no e devolve os seus sucessores."
+    (append (gerar-nos-horizontal no) (gerar-nos-vertical no))
+)
+
 ;; (gerar-nos-horizontal (no-teste))
 #|
 (
@@ -235,6 +288,7 @@
   )
 )
  |#
+
 (defun gerar-nos-vertical (no &optional (linha 1) (col 1))
     "Devolve os sucessores de um no, da parte vertical do tabuleiro. (Começa no index 1)"
     (cond 
@@ -251,55 +305,15 @@
     )
 )
 
-;; (expandir-no (no-teste))
-#|
- (
-    ((((1) (0)) ((0) (1))) ((((0) (0)) ((0) (1))) NIL 1 0 0) 1 1 0)
-    ((((0) (1)) ((0) (1))) ((((0) (0)) ((0) (1))) NIL 1 0 0) 1 1 0)
-    ((((0) (0)) ((1) (1))) ((((0) (0)) ((0) (1))) NIL 1 0 0) 1 1 0)
- )
- |#
-(defun expandir-no (no)
-    "Expande um no e devolve os seus sucessores."
-    (append (gerar-nos-horizontal no) (gerar-nos-vertical no))
+
+;; (criar-no (test-board) nil 1)
+;;( ( ((0)(0))  ((0)(1)) ) nil 1 0 0 )
+(defun criar-no (tabuleiro pai caixas-objetivo &optional (g 0) (h 0))
+"Constroi a estrutura do no."
+  (list tabuleiro pai caixas-objetivo g h)
 )
 
-;; gerar children com heuristica
-
-;; ============ SOLUCAO ============
-(defun get-caminho-solucao (no)
-    "Devolve uma lista de estados do no inicial ate ao no da solucao."
-    (cond
-        ( (null (get-no-pai no)) (list (get-no-estado no)))
-        (T
-           (append (get-caminho-solucao (get-no-pai no)) (list (get-no-estado no)) )
-        )
-    )
-)
-
-;; ============ Funcoes auxiliares para procura ============
-(defun remover-duplicados (lista1 lista2)
-"Remove da lista1 os valores ja existentes na lista2"
-  (if (or (null lista1) (null lista2))
-      lista1
-      (mapcar #'(lambda(elm2) (if (existe-valor elm2 lista2) NIL elm2)) lista1)
-
-      
-  )
-)
-
-(defun existe-valor (valor lista)
- "Devolve T ou NIL se o valor existe ou nao dentro da lista."
-  (eval (cons 'or (mapcar #'(lambda(elemento) (equal (get-no-estado valor) (get-no-estado elemento))) lista)))
-)
-
-(defun remover-nil (lista)
-    (apply #'append (mapcar #'(lambda(x) (if (null x) NIL (list x))) lista))
-)
-
-;; remover nos repetidos de abertos e fechados
-;; remover nil ????
-;;
+;; ============ HEURISTICAS ============
 
 (defun heuristica-base (no)
  "Heuristica dada no enunciado: h(x) = o(x) _ c(x) : o(x): objetivo de caixas do tabuleiro, c(x): numero de caixas fechadas"
@@ -307,9 +321,15 @@
 
 )
 
+(defun heuristica-top-xuxa (no)
+    "Heuristica criada pelos autores. WORK IN PROGRESS"
+    (print "heuristica-top-xuxa")
+)
+
 ;; ============ MEDIDAS DE DESEMPENHO ============
 
-;; Estrutura de dados: (<caminho-solucao> <n-abertos> <n-fechados>)
+;; <solucao>::= (<caminho-solucao> <n-abertos> <n-fechados>)
+;; <solucao-a*>::= (<caminho-solucao> <n-abertos> <n-fechados> <n-nos-expandidos>)
 
 ;; fator de ramificação média
 (defun fator-ramificacao-media (lista &optional (L (tamanho-solucao lista)) (valor-T (num-nos-gerados lista)) (B-min 1) (B-max 10))
