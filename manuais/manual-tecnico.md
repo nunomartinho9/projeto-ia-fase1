@@ -243,7 +243,7 @@ Menu Profundidade
         (format stream "~% - Objetivo: ~a caixas" objetivo)
         (format stream "~% - Solução encontrada")
         (print-tabuleiro (no-solucao caminho-solucao) stream)
-        ;;(format stream "~% - Fator de ramificação média: ~f" (fator-ramificacao-media caminho-solucao))
+        (format stream "~% - Fator de ramificação média: ~f" (fator-ramificacao-media caminho-solucao))
         (if (eql algoritmo 'DFS)
             (format stream "~% - Profundidade máxima: ~a" profundidade)
         )
@@ -257,4 +257,88 @@ Menu Profundidade
 ```
 
 ### **puzzle.lisp**
+___
+Aqui estão as funções relativas à resolução problema em si
 
+Foram implementadas algumas funções de tabuleiros de teste mais básicos para ir retificando a implementação das funções.
+
+![tabuleiros_teste](./images/tabuleiros-teste.png)
+
+### Funções seletoras e auxiliares
+Estão também implementadas algumas funções seletoras e auxiliares, tais como:
+
+```lisp
+;; ============ SELETORES ============
+
+;; (get-arcos-horizontais (tabuleiro-teste))
+;; ((0 0 0) (0 0 1) (0 1 1) (0 0 1))
+(defun get-arcos-horizontais (tabuleiro)
+ "Retorna a lista dos arcos horizontais de um tabuleiro."
+ (car tabuleiro)
+)
+
+;; (get-arcos-verticais (tabuleiro-teste))
+;; ((0 0 0) (0 1 1) (1 0 1) (0 1 1))
+(defun get-arcos-verticais (tabuleiro)
+ "Retorna a lista dos arcos verticiais de um tabuleiro."
+ (car(cdr tabuleiro))
+)
+
+;; (get-arco-na-posicao 2 3 (get-arcos-horizontais (tabuleiro-teste)))
+;; 1
+(defun get-arco-na-posicao (nLista pos listaArcos)
+ "Função que retorna o arco que se encontra numa posicao da lista de arcos horizontais ou verticais. (começa no 0 o index)"
+ (if (or (< nLista 0) (< pos 0)) 
+   NIL
+  (nth pos (nth nLista listaArcos))
+ )
+)
+
+;; ============ AUXILIARES ============
+
+;; (substituir 1 (car (get-arcos-horizontais (tabuleiro-teste)))) -> (0 0 0)
+;; (1 0 0)
+;; (substituir 2 (car (get-arcos-verticais (tabuleiro-teste))) 2) -> (0 1 0)
+;; (0 2 0)
+(defun substituir (index arcsList &optional (x 1))
+ "Função que recebe um índice (começa no 1), uma lista e valor x e deverá substituir o elemento nessa posição pelo valor x"
+ (cond 
+  ((= (- index 1) 0) (cons x (cdr arcsList)))
+  
+  (T (cons (car arcsList) (substituir (- index 1) (cdr arcsList) x)))
+ )
+)
+
+;; (arco-na-posicao 2 2 (get-arcos-horizontais (tabuleiro-teste)))
+;; ((0 0 0) (0 1 1) (0 1 1) (0 0 1))
+;; (arco-na-posicao 4 1 (get-arcos-verticais (tabuleiro-teste)))
+;; ((0 0 0) (0 1 1) (1 0 1) (1 1 1))
+(defun arco-na-posicao (listPos arcPos arcsList &optional (x 1))
+ "Insere um arco numa lista que representa o conjunto de arcos horizontais ou verticais de um tabuleiro. (Começa no indice 1)" 
+ (cond 
+  ( (= listPos 1) (cons (substituir arcPos (nth (- listPos 1) arcsList) x) (cdr arcsList)))
+
+  (T (cons (car arcsList)  (arco-na-posicao (- listPos 1) arcPos (cdr arcsList) x)) )
+
+ )
+ 
+)
+
+;;(count-colunas (tabuleiro-teste))
+;;3
+(defun count-colunas (tabuleiro)
+ "Contagem de colunas do tabuleiro"
+ (length (car (get-arcos-horizontais tabuleiro)))
+)
+
+;;(count-linhas (tabuleiro-teste))
+;;4
+(defun count-linhas (tabuleiro)
+ "Contagem de linhas do tabuleiro"
+ (length (get-arcos-horizontais tabuleiro))
+)
+```
+
+### Funções operadores
+
+Estão também implementadas funções que permitem inserir peças no tabuleiro, verificar se existem caixas fechadas

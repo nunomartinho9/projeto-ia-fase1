@@ -79,7 +79,7 @@
                             (iniciar)
                         )
                     )
-                    ('3 (format t "Obrigado por jogar!"))
+                    ('3 (progn (format t "Obrigado por jogar!~%~%") (quit)))
                 )
         )
     )
@@ -172,9 +172,24 @@
     )
 )
 
+(defun heuristica-menu ()
+"Mostra uma mensagem para escolher a profundidade"
+    (progn
+        (format t "~%o                                                o")
+        (format t "~%|       - Defina a heuristica a utilizar -       |")
+        (format t "~%|                                                |")
+        (format t "~%|           1 - Heuristica Enunciado             |")
+        (format t "~%|         2 - Heuristica Personalizada           |")
+        (format t "~%|                                                |")
+        (format t "~%|                  0 - Voltar                    |")
+        (format t "~%o                                                o")
+        (format t "~%~%>> ")
+    )
+)
+
 ;; ============= MENU OPÇÕES =============
 
-(defun opcao-tabuleiro (voltar)
+(defun opcao-tabuleiro (&optional (voltar 'iniciar))
 "Recebe um tabuleiro do menu"
     (progn 
         (tabuleiros-menu)
@@ -201,10 +216,10 @@
     (progn 
         (objetivo-menu)
         (let ((opcao (read)))
-            (cond ((equal opcao '0) (opcao-tabuleiro 'tabuleiros-menu))
+            (cond ((equal opcao '0) (opcao-tabuleiro 'opcao-algoritmo))
                   ((or (not (numberp opcao)) (< opcao 0))
                     (progn
-                        (format t "Escolha uma opção válida!~%")
+                        (format t "Escolha uma opcao valida!~%")
                         (opcao-objetivo)
                     )
                   )
@@ -217,19 +232,19 @@
 ;; FUNCAO INACABADA - FALTAM METER AS FUNCOES DOS ALGORITMOS
 ;; <solucao>::= (<id-tabuleiro> <algoritmo> <objetivo> <hora-inicio> <caminho-solucao> <hora-fim> <profundidade>)
 (defun opcao-algoritmo ()
-"Recebe a opção de algoritmo do utilizador e executa-o"
+"Recebe a opcao de algoritmo do utilizador e executa-o"
     (progn
         (algoritmos-menu)
         (let ((opcao (read)))
             (cond ((equal opcao '0) (iniciar))
-                    ((or (< opcao 0) (> opcao 4)) (progn (format t "Escolha uma opção válida!~%") (opcao-algoritmo)))
-                    ((not (numberp opcao)) (progn (format t "Escolha uma opção válida!~%")))
+                    ((or (< opcao 0) (> opcao 4)) (progn (format t "Escolha uma opcao valida!~%") (opcao-algoritmo)))
+                    ((not (numberp opcao)) (progn (format t "Escolha uma opcao valida!~%")))
                     (T (let* (
                                 (no-tabuleiro (opcao-tabuleiro 'opcao-algoritmo))
                                 (objetivo (opcao-objetivo))
                                 (id-tabuleiro (code-char (+ (first no-tabuleiro) 64)))
                                 (tabuleiro (second no-tabuleiro))
-                                (no (list (criar-no tabuleiro nil objetivo))) 
+                                (no (list (criar-no tabuleiro nil objetivo)))
                             )
                         (ecase opcao
                             (1
@@ -251,7 +266,17 @@
                                     )
                                 )
                             )
-                            (3)
+                            (3
+                                (let* (
+                                        (heuristica (opcao-heuristica no))
+                                        (solucao (list id-tabuleiro 'A* objetivo (hora-atual) (a* 'expandir-no heuristica no) (hora-atual)))
+                                    )
+                                    (progn
+                                        (ficheiro-estatisticas solucao)
+                                        solucao
+                                    )
+                                )
+                            )
                         )
                     ))
             )
@@ -260,13 +285,13 @@
 )
 
 (defun opcao-profundidade ()
-"Recebe um valor de profundidade do utilizador"
+"Recebe um valor de profundidade maxima do utilizador"
     (if (not (profundidade-menu))
         (let ((opcao (read)))
             (cond ((equal opcao '0) (opcao-objetivo))
                   ((or (not (numberp opcao)) (< opcao 0))
                     (progn
-                        (format t "Escolha uma opção válida!~%")
+                        (format t "Escolha uma opcao valida!~%")
                         (opcao-profundidade 'profundidade-menu)
                     )
                   )
@@ -276,6 +301,29 @@
     )
 )
 
+(defun opcao-heuristica (no)
+"Recebe um valor que cooresponde a heuristica escolhida pelo utilizador"
+    (if (not (heuristica-menu))
+        (let ((opcao (read)))
+            (cond ((equal opcao '0) (opcao-objetivo))
+                  ((or (not (numberp opcao)) (< opcao 0) (> opcao 2))
+                    (progn
+                        (format t "Escolha uma opcao valida!~%")
+                        (opcao-heuristica 'heuristica-menu)
+                    )
+                  )
+                  (T (ecase opcao
+                        (1
+                            (heuristica-base no)
+                        )
+                        (2
+                            (heuristica-top no)
+                        )
+                  ))
+            )
+        )
+    )
+)
 
 ;; ============= ESTATISTICAS =============
 
@@ -298,8 +346,7 @@
             (ecase algoritmo
                 ('bfs (estatisticas file id-tabuleiro algoritmo objetivo caminho-solucao hora-inicio hora-fim))
                 ('dfs (estatisticas file id-tabuleiro algoritmo objetivo caminho-solucao hora-inicio hora-fim profundidade))
-                ('a* ())
-                ('ida* ())
+                ('a* (estatisticas file id-tabuleiro algoritmo objetivo caminho-solucao hora-inicio hora-fim))
             )
         )
     )
@@ -318,16 +365,19 @@
         (format stream "~%Tabuleiro ~a" id-tabuleiro)
         (format stream "~% - Algoritmo: ~a" algoritmo)
         (format stream "~% - Objetivo: ~a caixas" objetivo)
-        (format stream "~% - Solução encontrada")
+        (format stream "~% - Solucao encontrada")
         (print-tabuleiro (no-solucao caminho-solucao) stream)
-        (format stream "~% - Fator de ramificação média: ~f" (fator-ramificacao-media caminho-solucao))
+        (format stream "~% - Fator de ramificacao media: ~f" (fator-ramificacao-media caminho-solucao))
         (if (eql algoritmo 'DFS)
-            (format stream "~% - Profundidade máxima: ~a" profundidade)
+            (format stream "~% - Profundidade maxima: ~a" profundidade)
         )
-        (format stream "~% - Nº nós gerados: ~a" (num-nos-gerados caminho-solucao))
-        (format stream "~% - Nº nós expandidos: ~a" (num-nos-expandidos caminho-solucao))
-        (format stream "~% - Penetrância: ~f" (penetrancia caminho-solucao))
-        (format stream "~% - Início: ~a" hora-inicio)
+        (format stream "~% - Nº nos gerados: ~a" (num-nos-gerados caminho-solucao))
+        (if (eql algoritmo 'A*)
+            (format stream "~% - Nº nos expandidos: ~a" (num-nos-expandidos-a* caminho-solucao))
+            (format stream "~% - Nº nos expandidos: ~a" (num-nos-expandidos caminho-solucao))
+        )
+        (format stream "~% - Penetrancia: ~f" (penetrancia caminho-solucao))
+        (format stream "~% - Inicio: ~a" hora-inicio)
         (format stream "~% - Fim: ~a~%~%" hora-fim)
     )
 )
