@@ -506,7 +506,47 @@ Sendo que o < tabuleiro > representa o estado atual do tabuleiro, < pai > o nó 
         )
     )
 )
+
+;; Função-algoritmo A*
+(defun a* (fnExpandir fnHeuristica abertos &optional (fechados '()) (numeroExpandidos 0))
+    "Algoritmo A*" 
+    (cond 
+        ((= (length abertos) 0) NIL)
+        (T
+            (let*
+                (
+                    (no-atual (substituir '5 (get-f-mais-baixo abertos) (funcall fnHeuristica (get-f-mais-baixo abertos))) )
+                    (sucessores (funcall fnExpandir no-atual fnHeuristica))
+                    (novos-fechados (recalcular-fechados fechados sucessores no-atual) )    ;; recalcular f dos abertos
+                    (novos-abertos (recalcular-abertos (cdr abertos) sucessores no-atual) ) ;; recalcular f dos fechados
+                    (abertos-com-novos-fechados (remover-nil (append novos-abertos (remover-duplicados sucessores novos-abertos) novos-fechados))) ;;passar os novos fechados para abertos
+                )
+                (if (verificar-solucao no-atual sucessores)
+                    (list (get-caminho-solucao no-atual) (length abertos) (length fechados) numeroExpandidos)
+                    (a* fnExpandir fnHeuristica abertos-com-novos-fechados (remover-duplicados (append fechados (list no-atual)) novos-fechados) (1+ numeroExpandidos) )
+                )
+
+            )
+        )
+    )
+
+)
 ```
+
+> ### Heurísticas
+
+> Heurística base (dada no enunciado)
+
+```lisp
+(defun heuristica-base (no)
+ "Heuristica dada no enunciado: h(x) = o(x) _ c(x) : o(x): objetivo de caixas do tabuleiro, c(x): numero de caixas fechadas"
+  (- (get-no-objetivo no) (calcular-caixas-fechadas (get-no-estado no)) )  
+
+)
+```
+
+> Heurística top (criada pelos autores)
+
 
 > ### Funções nó  
 
@@ -669,32 +709,33 @@ Sendo que o < tabuleiro > representa o estado atual do tabuleiro, < pai > o nó 
 ### **Resultados**
 
 ___
+Os resultados a seguir apresentados calculados com o algoritmo A* utilizaram a heurística base fornecida no enunciado.
 
 | Tabuleiro | Algoritmo | Objetivo | Fator de Ramificação Média | Nós gerados | Nós expandidos | Profundidade máxima | Penetrância | Início | Fim |  
 | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
 | A | BFS | 3 | 6.9085693 | 385 | 68 | N.A. | 0.007792208 | 18:20:11 | 18:20:11 |
 | A | DFS | 3 | 1.139375 | 96 | 10 | 1000 | 0.114583336 | 18:21:10 | 18:21:10 |
-| A | A* | 3 |
+| A | A* | 3 | 2.6523437 | 28 | 2 | N.A | 0.10714286 | 22:23:13 | 22:23:13 |
 | B | BFS | 7 | 10.458984 | 120 | 14 | N.A. | 0.016666668 | 18:29:13 | 18:29:13 |
 | B | DFS | 7 | 1.5356445 | 85 | 7 | 1000 | 0.09411765 | 18:29:34 | 18:29:34 |
-| B | A* | 7 |
+| B | A* | 7 | 3.53125 | 16 | 1 | N.A. | 0.125 | 22:34:11 | 22:34:11 |
 | C | BFS | 10 | O.M. | - | - | - | - | - | - | - |
 | C | DFS | 10 | 1.3051758 | 162 | 14 | 1000 | 0.09259259 | 18:37:24 | 18:37:24 |
-| C | A* | 10 |
+| C | A* | 10 | 1.4277344 | 136 | 108 | N.A. | 0.080882356 | 22:35:10 | 22:35:10 |
 | D | BFS | 10 | O.M. | - | - | - | - | - | - | - |
 | D | DFS | 10 | 1.0974121 | 1240 | 42 | 1000 | 0.03467742 | 18:45:6 | 18:45:6
-| D | A* | 10 |
+| D | A* | 10 | O.M. | - | - | - | - | - | - | - |
 | E | BFS | 20 | O.M. | - | - | - | - | - | - | - |
-| E | DFS | 20 |
-| E | A* | 20 |
+| E | DFS | 20 | 1.1174316 | 796 | 30 | 1000 | 0.038944725 | 22:38:8 | 22:38:8 |
+| E | A* | 20 | 1.343811 | 537 | 16 | N.A. | 0.031657357 | 22:39:12 | 22:39:12 |
 | F | BFS | 35 | O.M. | - | - | - | - | - | - | - |
 | F | DFS | 35 | 1.1174316 | 796 | 30 | 1000 | 0.038944725 | 18:51:0 | 18:51:0 |
-| F | A* | 35 |
+| F | A* | 35 | O.M. | - | - | - | - | - | - | - |
 
 >N.A. - não aplicável  
->O.M. - out of memory
+>O.M. - out of memory (***stack overflow***)
 
-Com estes resultados podemos ver que a aplicação mostra uma solução possível para cada tabuleiro, excepto onde estes apresentam uma exceção *out-of-memory* devido às limitações do *LispWorks*. Na maioria dos casos, a solução é apresentada num tempo de execução bastante reduzido e inferior a 1 segundo.
+Com estes resultados podemos ver que a aplicação mostra uma solução possível para cada tabuleiro, excepto onde estes apresentam uma exceção *stack overflow* devido às limitações do *LispWorks*. Na maioria dos casos, a solução é apresentada num tempo de execução bastante reduzido e inferior a 1 segundo.
 
 ### **Limitações**
 
