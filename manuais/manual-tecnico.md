@@ -164,7 +164,7 @@ Voltando ao menu principal, temos a segunda opção do menu ***Resolver um probl
 
 Também é criado ou ficheiro ***resultados.dat*** com resultados mais detalhados de todas as execuções realizadas.
 
-Menu algoritmos  
+Menu Algoritmos  
 ![menu algoritmos](./images/menu_algoritmos.png)
 
 Menu Objetivo Caixas Fechadas  
@@ -173,7 +173,72 @@ Menu Objetivo Caixas Fechadas
 Menu Profundidade  
 ![menu_profundidade](./images/menu_profundidade.png)
 
+Menu Heurística  
+![menu_heuristica](./images/menu_heuristica.png)
+
 ```lisp
+;; Função opcao-objetivo: trata a opção do número de caixas fechadas escolhido do utilizador
+(defun opcao-objetivo ()
+"Recebe um valor de caixas fechadas do utilizador"
+    (progn 
+        (objetivo-menu)
+        (let ((opcao (read)))
+            (cond ((equal opcao '0) (opcao-tabuleiro 'opcao-algoritmo))
+                  ((or (not (numberp opcao)) (< opcao 0))
+                    (progn
+                        (format t "Escolha uma opcao valida!~%")
+                        (opcao-objetivo)
+                    )
+                  )
+                  (T opcao)
+            )
+        )
+    )
+)
+
+;; Função opcao-profundidade: trata a opção de profundidade máxima do utilizador
+(defun opcao-profundidade ()
+"Recebe um valor de profundidade maxima do utilizador"
+    (if (not (profundidade-menu))
+        (let ((opcao (read)))
+            (cond ((equal opcao '0) (opcao-objetivo))
+                  ((or (not (numberp opcao)) (< opcao 0))
+                    (progn
+                        (format t "Escolha uma opcao valida!~%")
+                        (opcao-profundidade 'profundidade-menu)
+                    )
+                  )
+                  (T opcao)
+            )
+        )
+    )
+)
+
+;; Função opcao-heuristica: trata a opção de escolha de heuristica do utilizador
+(defun opcao-heuristica ()
+"Recebe um valor que cooresponde a heuristica escolhida pelo utilizador"
+    (if (not (heuristica-menu))
+        (let ((opcao (read)))
+            (cond ((equal opcao '0) (opcao-objetivo))
+                  ((or (not (numberp opcao)) (< opcao 0) (> opcao 2))
+                    (progn
+                        (format t "Escolha uma opcao valida!~%")
+                        (opcao-heuristica 'heuristica-menu)
+                    )
+                  )
+                  (T (ecase opcao
+                        (1
+                            'heuristica-base
+                        )
+                        (2
+                            'heuristica-top
+                        )
+                  ))
+            )
+        )
+    )
+)
+
 ;; Função opcao-algoritmo: trata a opção de algoritmo do utilizador
 (defun opcao-algoritmo ()
 "Recebe a opcao de algoritmo do utilizador e executa-o"
@@ -212,8 +277,8 @@ Menu Profundidade
                             )
                             (3
                                 (let* (
-                                        (heuristica (opcao-heuristica no))
-                                        (solucao (list id-tabuleiro 'A* objetivo (hora-atual) (a* 'expandir-no heuristica no) (hora-atual)))
+                                        (heuristica (opcao-heuristica))
+                                        (solucao (list id-tabuleiro 'A* objetivo (hora-atual) (a* 'expandir-no-a* heuristica no) (hora-atual)))
                                     )
                                     (progn
                                         (ficheiro-estatisticas solucao)
@@ -535,7 +600,7 @@ Sendo que o < tabuleiro > representa o estado atual do tabuleiro, < pai > o nó 
 
 > ### Heurísticas
 
-> Heurística base (dada no enunciado)
+> Heurística base (fornecida no enunciado)
 
 ```lisp
 (defun heuristica-base (no)
@@ -544,9 +609,6 @@ Sendo que o < tabuleiro > representa o estado atual do tabuleiro, < pai > o nó 
 
 )
 ```
-
-> Heurística top (criada pelos autores)
-
 
 > ### Funções nó  
 
@@ -735,16 +797,21 @@ Os resultados a seguir apresentados calculados com o algoritmo A* utilizaram a h
 >N.A. - não aplicável  
 >O.M. - out of memory (***stack overflow***)
 
-Com estes resultados podemos ver que a aplicação mostra uma solução possível para cada tabuleiro, excepto onde estes apresentam uma exceção *stack overflow* devido às limitações do *LispWorks*. Na maioria dos casos, a solução é apresentada num tempo de execução bastante reduzido e inferior a 1 segundo.
+Com estes resultados podemos ver que a aplicação mostra uma solução possível para cada tabuleiro, excepto onde estes apresentam uma exceção *stack overflow* devido às limitações do *LispWorks* / *clisp*. Na maioria dos casos, a solução é apresentada num tempo de execução bastante reduzido e inferior a 1 segundo.
+
+A heurística que nos foi fornecida não é eficiente para ser utilizada no algoritmo *A* * pois faz com que este se comporte como o algoritmo *BFS*.
 
 ### **Limitações**
 
 ___
 
-A principal limitação é a falta de memória do *LispWorks* que impossibilita a resolução, através do algoritmo *BFS*, dos tabuleiros com poucos ou nenhuns arcos preenchidos.
+A principal limitação é a falta de memória do *LispWorks* / *clisp* que impossibilita a resolução, através do algoritmo *BFS* e *A* * (com a heurística que nos foi fornecida), dos tabuleiros maiores com poucos ou nenhuns arcos preenchidos.
 
-Todos os requisitos base enumerados no enunciado foram implementados à exceção dos requisitos bónus:
+Todos os requisitos base enumerados no enunciado foram implementados à exceção de:
 
- 1. Implementação da estratégia SMA*;
- 2. Implementação da estratégia IDA*;
- 3. Implementação da estratégia RBFS.
+- Heurística personalizada
+
+- Bónus
+   1. Implementação da estratégia SMA*;
+   2. Implementação da estratégia IDA*;
+   3. Implementação da estratégia RBFS.

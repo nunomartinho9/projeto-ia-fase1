@@ -36,7 +36,7 @@ ___
 
 >### Instalação
 
-Para que o programa possa funcionar é necessário possuir um IDE ou uma aplicação que compile a linguagem *Common LISP*.
+Para que o programa possa funcionar é necessário possuir um IDE ou um interpretador que compile a linguagem *Common LISP*.
 
 >### Utilização
 
