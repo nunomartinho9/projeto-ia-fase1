@@ -262,25 +262,24 @@
 
 ;; ============ MEDIDAS DE DESEMPENHO ============
 
-;; Estrutura de dados a ser utilizada: (<caminho-solucao> <n-abertos> <n-fechados>)
+;; Estrutura de dados: (<caminho-solucao> <n-abertos> <n-fechados>)
 
 ;; fator de ramificação média
-(defun fator-ramificacao-media (lista &optional (L (tamanho-solucao lista)) (valor-T (num-nos-gerados lista)) (margem-erro 0.1) (b-min 1) (b-max 10e11))
+(defun fator-ramificacao-media (lista &optional (L (tamanho-solucao lista)) (valor-T (num-nos-gerados lista)) (B-min 1) (B-max 10))
 "Retorna o fator de ramificacao media (c/ bisseccao)"
-    (let ((b-avg (/ (+ b-min b-max) 2)))
-        (cond ((< (- b-max b-min) margem-erro) (/ (+ b-max b-min) 2))
-              ((< (aux-ramificacao b-avg L valor-T) 0) (fator-ramificacao-media lista L valor-T margem-erro b-avg b-max))
-              (T (fator-ramificacao-media lista L valor-T margem-erro b-min b-avg))      
+    (let ((B-avg (/ (+ B-min B-max) 2)))
+        (cond ((< (- B-max B-min) 0.1) (/ (+ B-max B-min) 2))
+              ((< (aux-ramificacao B-avg L valor-T) 0) (fator-ramificacao-media lista L valor-T B-avg B-max))
+              (T (fator-ramificacao-media lista L valor-T B-min B-avg))   
         )
     )
 )
 
 ;; B + B^2 + ... + B^L = T
-(defun aux-ramificacao (B L valor-T)
- "B + B^2 + ... + B^L = T"
+(defun aux-ramificacao (B L valor-T) ;; B (average) = 5.0E11 / L = 11 / T = 96
   (cond
-   ((= 1 L) (- B valor-T))
-   (T (+ (expt B L) (aux-ramificacao B (- L 1) valor-T)))
+    ((= 1 L) (- B valor-T))
+    (T (+ (expt B L) (aux-ramificacao B (- L 1) valor-T)))
   )
 )
 
